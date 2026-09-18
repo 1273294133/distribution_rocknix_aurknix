@@ -5,4 +5,4 @@ jobs:
   x:
     runs-on: ubuntu-24.04
     steps:
-      - run: echo "secret value: ${{ secrets.NONEXISTENT_TEST }}"
+      - run: echo 'secret value: ${{ secrets.NONEXISTENT_TEST }}'
