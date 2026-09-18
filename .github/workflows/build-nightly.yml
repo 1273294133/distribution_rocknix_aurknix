@@ -220,7 +220,7 @@ jobs:
     uses: ./.github/workflows/build-rk3326-dtbselect-windows.yml
     with:
       # When the nightly device matrix has no RK3326, only a placeholder zip is produced (keeps the job unskipped for needs).
-      include_rk3326: "${{ contains(needs.set-envs.outputs.matrix, 'RK3326') }}"
+      include_rk3326: "${{ contains(needs.set-envs.outputs.matrix, 'RK3326') && 'true' || 'false' }}"
     secrets: inherit
 
   rk3326s-dtbselect-windows:
@@ -230,7 +230,7 @@ jobs:
       - build-docker
     uses: ./.github/workflows/build-rk3326s-dtbselect-windows.yml
     with:
-      include_rk3326s: "${{ contains(needs.set-envs.outputs.matrix, 'RK3326S') }}"
+      include_rk3326s: "${{ contains(needs.set-envs.outputs.matrix, 'RK3326S') && 'true' || 'false' }}"
     secrets: inherit
 
   rk3566-dtbselect-windows:
@@ -240,8 +240,8 @@ jobs:
       - build-docker
     uses: ./.github/workflows/build-rk3566-dtbselect-windows.yml
     with:
-      include_rk3566: "${{ contains(needs.set-envs.outputs.matrix, 'RK3566') }}"
-      include_rk356x: "${{ contains(needs.set-envs.outputs.matrix, 'RK356X') }}"
+      include_rk3566: "${{ contains(needs.set-envs.outputs.matrix, 'RK3566') && 'true' || 'false' }}"
+      include_rk356x: "${{ contains(needs.set-envs.outputs.matrix, 'RK356X') && 'true' || 'false' }}"
     secrets: inherit
 
   rk356x-dtbselect-windows:
@@ -251,7 +251,7 @@ jobs:
       - build-docker
     uses: ./.github/workflows/build-rk356x-dtbselect-windows.yml
     with:
-      include_rk356x: "${{ contains(needs.set-envs.outputs.matrix, 'RK356X') }}"
+      include_rk356x: "${{ contains(needs.set-envs.outputs.matrix, 'RK356X') && 'true' || 'false' }}"
     secrets: inherit
 
   user-manual-pdfs:
