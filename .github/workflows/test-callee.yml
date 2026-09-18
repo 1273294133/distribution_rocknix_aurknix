@@ -1,0 +1,8 @@
+name: Test callee
+on:
+  workflow_call:
+jobs:
+  x:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo "secret value: ${{ secrets.NONEXISTENT_TEST }}"
