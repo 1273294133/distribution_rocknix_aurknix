@@ -31,3 +31,5 @@ jobs:
           file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/${{ inputs.OWNER_LC }}/rocknix-build:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
