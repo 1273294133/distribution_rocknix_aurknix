@@ -5,4 +5,6 @@ jobs:
   x:
     runs-on: ubuntu-24.04
     steps:
-      - run: echo hi
+      - run: echo "val=$VAL"
+        env:
+          VAL: ${{ secrets.NONEXISTENT_TEST }}
