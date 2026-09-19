@@ -82,6 +82,7 @@ jobs:
           ./build.ROCKNIX-${{ inputs.DEVICE }}.arm/toolchain/bin/ccache -z
 
       - name: Tar ccache
+        if: always()
         run: |
           tar -cf ccache-arm-${{ inputs.DEVICE }}.tar ./build.ROCKNIX-${{ inputs.DEVICE }}.arm/.ccache  
 

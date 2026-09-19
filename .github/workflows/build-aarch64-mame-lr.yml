@@ -99,10 +99,12 @@ jobs:
           ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -z
 
       - name: Tar ccache
+        if: always()
         run: |
            tar -cf ccache-aarch64-${{ inputs.DEVICE }}-mame.tar ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache  
 
       - name: Save ccache
+        if: always()
         uses: ncipollo/release-action@v1
         with:
           tag: ccache
