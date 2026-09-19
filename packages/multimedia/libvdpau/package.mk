@@ -7,7 +7,7 @@ PKG_VERSION="1.5"
 PKG_SHA256="a5d50a42b8c288febc07151ab643ac8de06a18446965c7241f89b4e810821913"
 PKG_LICENSE="MIT"
 PKG_SITE="https://wiki.freedesktop.org/www/Software/VDPAU/"
-PKG_URL="https://gitlab.freedesktop.org/vdpau/libvdpau/-/archive/${PKG_VERSION}/libvdpau-${PKG_VERSION}.tar.bz2"
+PKG_URL="https://deb.debian.org/debian/pool/main/libv/libvdpau/libvdpau_${PKG_VERSION}.orig.tar.bz2"
 PKG_DEPENDS_TARGET="toolchain libX11 xorgproto libXext"
 PKG_LONGDESC="VDPAU is the Video Decode and Presentation API for UNIX."
 

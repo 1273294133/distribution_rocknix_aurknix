@@ -4,10 +4,10 @@
 
 PKG_NAME="freetype"
 PKG_VERSION="2.13.3"
-PKG_SHA256="96afc0e78f10c45fb16b5da7190aa9c52e64ab30e4caee11b5818d8fc12e05ea"
+PKG_SHA256="686ec73cbf6783b245dd068a09ce807b729ac0f8a46dd70f7867923c32fdf4de"
 PKG_LICENSE="GPL"
 PKG_SITE="https://freetype.org"
-PKG_URL="https://download.savannah.gnu.org/releases/freetype/freetype-${PKG_VERSION}.tar.xz"
+PKG_URL="https://deb.debian.org/debian/pool/main/f/freetype/freetype_${PKG_VERSION}+dfsg.orig.tar.xz"
 PKG_DEPENDS_HOST="toolchain:host"
 PKG_DEPENDS_TARGET="toolchain zlib libpng"
 PKG_LONGDESC="The FreeType engine is a free and portable TrueType font rendering engine."
