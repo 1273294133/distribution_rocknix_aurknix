@@ -4,10 +4,10 @@
 
 PKG_NAME="libevdev"
 PKG_VERSION="1.13.4"
-PKG_SHA256="f00ab8d42ad8b905296fab67e13b871f1a424839331516642100f82ad88127cd"
+PKG_SHA256="0cfa48d1dddac26988ae9ce16282eff97683f1adcd3f5d4312f86d714565d890"
 PKG_LICENSE="MIT"
 PKG_SITE="http://www.freedesktop.org/wiki/Software/libevdev/"
-PKG_URL="http://www.freedesktop.org/software/libevdev/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="libevdev is a wrapper library for evdev devices."
 PKG_BUILD_FLAGS="+pic"
