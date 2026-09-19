@@ -4,10 +4,10 @@
 
 PKG_NAME="libpng"
 PKG_VERSION="1.6.50"
-PKG_SHA256="4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307"
+PKG_SHA256="71158e53cfdf2877bc99bcab33641d78df3f48e6e0daad030afe9cb8c031aa46"
 PKG_LICENSE="LibPNG2"
 PKG_SITE="http://www.libpng.org/"
-PKG_URL="${SOURCEFORGE_SRC}/libpng/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="https://github.com/pnggroup/libpng/archive/refs/tags/v${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_HOST="zlib:host"
 PKG_DEPENDS_TARGET="toolchain zlib"
 PKG_LONGDESC="An extensible file format for the lossless, portable, well-compressed storage of raster images."

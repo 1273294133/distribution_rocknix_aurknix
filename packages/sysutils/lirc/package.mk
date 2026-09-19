@@ -4,10 +4,10 @@
 
 PKG_NAME="lirc"
 PKG_VERSION="0.10.2"
-PKG_SHA256="3d44ec8274881cf262f160805641f0827ffcc20ade0d85e7e6f3b90e0d3d222a"
+PKG_SHA256="a44a26caf9ba55c2343e065f0a9451425c136572b279ea1e011ad012b36b607e"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.lirc.org"
-PKG_URL="https://sourceforge.net/projects/lirc/files/LIRC/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_URL="https://deb.debian.org/debian/pool/main/l/lirc/lirc_${PKG_VERSION}.orig.tar.gz"
 PKG_DEPENDS_TARGET="toolchain libftdi1 libusb-compat libxslt alsa-lib"
 PKG_LONGDESC="LIRC is a package that allows you to decode and send infra-red signals."
 PKG_TOOLCHAIN="autotools"
