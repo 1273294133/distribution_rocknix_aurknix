@@ -4,10 +4,10 @@
 
 PKG_NAME="fontconfig"
 PKG_VERSION="2.17.1"
-PKG_SHA256="9f5cae93f4fffc1fbc05ae99cdfc708cd60dfd6612ffc0512827025c026fa541"
+PKG_SHA256="f07504cef87f171ee1748352e2df9b9f125352f620fa0d03a9284306ea2c40a4"
 PKG_LICENSE="OSS"
 PKG_SITE="https://www.freedesktop.org/wiki/Software/fontconfig/"
-PKG_URL="https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="https://deb.debian.org/debian/pool/main/f/fontconfig/fontconfig_${PKG_VERSION}.orig.tar.gz"
 PKG_DEPENDS_TARGET="toolchain util-linux util-macros freetype libxml2 zlib expat"
 PKG_LONGDESC="Fontconfig is a library for font customization and configuration."
 PKG_TOOLCHAIN="configure"

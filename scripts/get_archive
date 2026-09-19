@@ -40,6 +40,10 @@ while [ ${NBWGET} -gt 0 ]; do
   for url in ${PKG_URLS}; do
     rm -f "${PACKAGE}"
     if ${WGET_CMD} "${url}"; then
+      if file "${PACKAGE}" | grep -qiE "HTML document|ASCII text"; then
+        build_msg "CLR_WARNING" "WARNING" "Downloaded file looks like an error page, trying next source (${url})"
+        continue
+      fi
       CALC_SHA256=$(sha256sum "${PACKAGE}" | cut -d" " -f1)
 
       [ -z "${PKG_SHA256}" -o "${PKG_SHA256}" = "${CALC_SHA256}" ] && break 2
