@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kernel-firmware"
-PKG_VERSION="20260110"
-PKG_SHA256="8978ac27fb306252739bab54d17a9926fe936d060eacb56e5c3de55c69a81283"
+PKG_VERSION="20260309"
+PKG_SHA256="28fb1b57fa9531edbd001a2462068267f10622e613abd40f952344b3f1fc5a16"
 PKG_LICENSE="other"
 PKG_SITE="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/"
-PKG_URL="https://gitlab.com/kernel-firmware/linux-firmware/-/archive/${PKG_VERSION}/linux-firmware-${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/ROCKNIX/distribution-sources/releases/download/sources-v2/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_NEED_UNPACK="${PROJECT_DIR}/${PROJECT}/packages/${PKG_NAME} ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/packages/${PKG_NAME}"
 PKG_LONGDESC="kernel-firmware: kernel related firmware"
 PKG_TOOLCHAIN="manual"
