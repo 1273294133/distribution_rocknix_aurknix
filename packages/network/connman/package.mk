@@ -4,10 +4,10 @@
 
 PKG_NAME="connman"
 PKG_VERSION="1.44"
-PKG_SHA256="d751da9858a6e3dfe70d6c98e71ea4f5896e1c92c5e1b17f10d055eaeae0e452"
+PKG_SHA256="2be2b00321632b775f9eff713acd04ef21e31fbf388f6ebf45512ff4289574ff"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.connman.net"
-PKG_URL="https://git.kernel.org/pub/scm/network/connman/connman.git/snapshot/connman-${PKG_VERSION}.tar.gz"
+PKG_URL="https://deb.debian.org/debian/pool/main/c/connman/connman_${PKG_VERSION}.orig.tar.xz"
 PKG_DEPENDS_TARGET="autotools:host gcc:host dbus glib iptables iwd readline"
 PKG_LONGDESC="A modular network connection manager."
 PKG_TOOLCHAIN="autotools"
