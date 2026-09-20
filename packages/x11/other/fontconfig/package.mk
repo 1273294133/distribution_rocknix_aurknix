@@ -3,12 +3,11 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="fontconfig"
-PKG_VERSION="2.17.1"
-PKG_SHA256="f07504cef87f171ee1748352e2df9b9f125352f620fa0d03a9284306ea2c40a4"
+PKG_VERSION="2.18.3"
+PKG_SHA256="4f7b554a38cdf78c033f666c8871f3749e14a094f65a07f630c91ed0b43d35e3"
 PKG_LICENSE="OSS"
 PKG_SITE="https://www.freedesktop.org/wiki/Software/fontconfig/"
-PKG_URL="https://deb.debian.org/debian/pool/main/f/fontconfig/fontconfig_${PKG_VERSION}.orig.tar.gz"
-PKG_SOURCE_DIR="fontconfig-${PKG_VERSION}-6d0a98982ec351c165c9224c8b7dbdfca3010e47"
+PKG_URL="https://github.com/ROCKNIX/distribution-sources/releases/download/sources-v2/${PKG_NAME}-2.18.3.tar.xz"
 PKG_DEPENDS_TARGET="toolchain util-linux util-macros freetype libxml2 zlib expat"
 PKG_LONGDESC="Fontconfig is a library for font customization and configuration."
 PKG_TOOLCHAIN="configure"
