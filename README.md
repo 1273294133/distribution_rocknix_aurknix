@@ -1,6 +1,6 @@
 <img src="https://github.com/AveyondFly/distribution_rocknix/blob/next/distributions/ROCKNIX/logos/rocknix-logo.png?raw=yes" width=192>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Latest Version](https://img.shields.io/github/release/AveyondFly/distribution_rocknix.svg?color=3b82f6&label=latest%20version&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/releases/latest) [![Activity](https://img.shields.io/github/commit-activity/m/AveyondFly/distribution_rocknix?color=3b82f6&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/commits) [![Pull Requests](https://img.shields.io/github/issues-pr-closed/AveyondFly/distribution_rocknix?color=3b82f6&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/pulls)
 
-> ### ⚡ 本仓库是 **AURKNIX 的魔改版**：在 [AURKNIX (AveyondFly/distribution_rocknix)](https://github.com/AveyondFly/distribution_rocknix) 基础上深度魔改，用于**兼容老晶晨（Amlogic）芯片**设备（S905 / S905L / GXL 平台电视盒子等），并持续维护可直接刷写的固件镜像。
+> ### ⚡ 本仓库是 **AURKNIX 的魔改版**：在 [AURKNIX (AveyondFly/distribution_rocknix)](https://github.com/AveyondFly/distribution_rocknix) 基础上深度魔改，用于**兼容老晶晨（Amlogic）芯片**设备（S905 / S905L / GXL 平台电视盒子等），并提供可直接刷写的固件镜像（能用就行，暂无持续更新维护）。
 
 > ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者手头只有 **S905L 电视盒子** 和 **R36S 寨机**（RK3326）两类设备，因此仅对这两类做了实机适配与验证；其他型号（如 S905X / S905M / S905D 等衍生型号）理论上兼容，但**未经实机测试**，刷机前请自行评估风险。
 
@@ -23,7 +23,7 @@ ROCKNIX is an immutable Linux distribution for handheld gaming devices developed
 
 This repository is **forked from [AveyondFly/distribution_rocknix](https://github.com/AveyondFly/distribution_rocknix)** (AURKNIX), which is itself a community fork of **[ROCKNIX](https://github.com/ROCKNIX/distribution)** — an immutable Linux distribution for handheld gaming devices.
 
-This fork adds support for devices and emulators not included in the official distribution, and additionally maintains **buildable, auto-released firmware images** for:
+This fork adds support for devices and emulators not included in the official distribution, and additionally provides **buildable firmware images** (no continuous maintenance commitment) for:
 
 - **Amlogic S905 / S905L TV boxes** (aarch64 image, see download button above) — uses the CoreELEC linux-amlogic kernel with the full Amlogic device-tree set
 - **RK3326 handhelds** (R36S, RGB10, XU10, etc., see download button above)
