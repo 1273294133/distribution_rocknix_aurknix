@@ -1,12 +1,30 @@
 <img src="https://github.com/AveyondFly/distribution_rocknix/blob/next/distributions/ROCKNIX/logos/rocknix-logo.png?raw=yes" width=192>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Latest Version](https://img.shields.io/github/release/AveyondFly/distribution_rocknix.svg?color=3b82f6&label=latest%20version&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/releases/latest) [![Activity](https://img.shields.io/github/commit-activity/m/AveyondFly/distribution_rocknix?color=3b82f6&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/commits) [![Pull Requests](https://img.shields.io/github/issues-pr-closed/AveyondFly/distribution_rocknix?color=3b82f6&style=flat-square)](https://github.com/AveyondFly/distribution_rocknix/pulls)
 
+### 📥 固件下载 / Firmware Downloads
+
+| 目标设备 | 最新固件 |
+|---|---|
+| **Amlogic S905 / S905L 电视盒子**（AURKNIX S905 aarch64 镜像） | [![S905 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20S905%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-3b82f6?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/nightly-20260919) |
+| **RK3326 掌机**（R36S / RGB10 / XU10 等，AURKNIX RK3326 aarch64 镜像） | [![RK3326 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20RK3326%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918) |
+| 查看全部历史版本 | [![全部 Release](https://img.shields.io/badge/%E5%85%A8%E9%83%A8%20Release-64748b?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases) |
+
+> **S905/S905L 盒子刷机提示**：镜像写 SD 卡后从 SD 卡启动（链式引导，不动盒子内置系统）。镜像 FAT 分区含全套 amlogic dtb，S905L 无后缀盒子优先在 `uEnv.ini` 设置 `dtb_name=meson-gxlx-s905l-p271.dtb`；如启动异常可依次尝试 `meson-gxl-s905x-p212.dtb`、`meson-gxbb-p201.dtb`。
+
+
 ---
 
 ROCKNIX is an immutable Linux distribution for handheld gaming devices developed by a small community of enthusiasts.  Our goal is to produce an operating system that has the features and capabilities that we need, and to have fun as we develop it.
 
 ## About This Fork
 
-This is an **unofficial** fork of ROCKNIX that provides support for additional devices and emulators not included in the official distribution.
+This repository is **forked from [AveyondFly/distribution_rocknix](https://github.com/AveyondFly/distribution_rocknix)** (AURKNIX), which is itself a community fork of **[ROCKNIX](https://github.com/ROCKNIX/distribution)** — an immutable Linux distribution for handheld gaming devices.
+
+This fork adds support for devices and emulators not included in the official distribution, and additionally maintains **buildable, auto-released firmware images** for:
+
+- **Amlogic S905 / S905L TV boxes** (aarch64 image, see download button above) — uses the CoreELEC linux-amlogic kernel with the full Amlogic device-tree set
+- **RK3326 handhelds** (R36S, RGB10, XU10, etc., see download button above)
+
+> **Note — device support requests:** Please **do not** open issues asking for support for devices not listed in this README. New device support depends entirely on whether a vendor or community member **donates a development unit**. Maintainers cannot reliably port to hardware they do not have — guessing from specs or marketing photos is not a viable path to a working image.
 
 > **Note — device support requests:** Please **do not** open issues asking for support for devices not listed in this README. New device support depends entirely on whether a vendor or community member **donates a development unit**. Maintainers cannot reliably port to hardware they do not have — guessing from specs or marketing photos is not a viable path to a working image.
 
