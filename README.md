@@ -2,8 +2,8 @@
 
 > ### ⚡ 本仓库是 **AURKNIX 的魔改版**：在 [AURKNIX (AveyondFly/distribution_rocknix)](https://github.com/AveyondFly/distribution_rocknix) 基础上深度魔改，用于**兼容老晶晨（Amlogic）芯片**设备（S905 / S905L / GXL 平台电视盒子等），并提供可直接刷写的固件镜像（能用就行，暂无持续更新维护）。
 
-[![Amlogic S905 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=nightly-*&label=%E6%99%B6%E6%99%A8%20S905%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=3b82f6&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/nightly-20260919)
-[![RK3326 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=RK3326%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918)
+[![Amlogic S905 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=nightly-*&label=Amlogic%20S905%20Latest&color=3b82f6&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/nightly-20260919)
+[![RK3326 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=RK3326%20Latest&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918)
 
 > ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者手头只有 **S905L 电视盒子** 和 **R36S 寨机**（RK3326）两类设备，因此仅对这两类做了实机适配与验证；其他型号（如 S905X / S905M / S905D 等衍生型号）理论上兼容，但**未经实机测试**，刷机前请自行评估风险。
 
