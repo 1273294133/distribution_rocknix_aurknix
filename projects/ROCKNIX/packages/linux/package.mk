@@ -196,6 +196,11 @@ post_patch() {
     patch -d ${PKG_BUILD} -p1 \
       < ${PROJECT_DIR}/${PROJECT}/devices/S905/patches/common_drivers-dmc-monitor-exit-static-inline.patch
 
+    # combine mainline meson pinctrl (gxbb/gxl) into one module and drop its EXPORT_SYMBOL
+    # to avoid modpost "exported twice" vs common_drivers BSP pinctrl built into vmlinux
+    patch -d ${PKG_BUILD} -p1 \
+      < ${PROJECT_DIR}/${PROJECT}/devices/S905/patches/linux-pinctrl-meson-gxl-module.patch
+
     sed -e 's|^KBUILD_CFLAGS += $(call cc-option,-Wimplicit-fallthrough,).*||' \
         -e 's|^KBUILD_CFLAGS   := \(.*\)|KBUILD_CFLAGS   := -Wno-format -Wno-unused-function -Wno-misleading-indentation \1|' \
         -e 's|^KBUILD_LDFLAGS :=|KBUILD_LDFLAGS := $(call ld-option,--no-warn-rwx-segments)|' \

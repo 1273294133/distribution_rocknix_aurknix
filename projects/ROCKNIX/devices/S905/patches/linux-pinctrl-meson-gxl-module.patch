@@ -1,0 +1,74 @@
+--- a/drivers/pinctrl/meson/Makefile
++++ b/drivers/pinctrl/meson/Makefile
+@@ -1,10 +1,10 @@
+ # SPDX-License-Identifier: GPL-2.0-only
+-obj-$(CONFIG_PINCTRL_MESON) += pinctrl-meson.o
+-obj-$(CONFIG_PINCTRL_MESON8_PMX) += pinctrl-meson8-pmx.o
++obj-$(CONFIG_PINCTRL_MESON) += pinctrl-meson-gxl-mod.o
++pinctrl-meson-gxl-mod-y := pinctrl-meson.o pinctrl-meson8-pmx.o
++pinctrl-meson-gxl-mod-$(CONFIG_PINCTRL_MESON_GXBB) += pinctrl-meson-gxbb.o
++pinctrl-meson-gxl-mod-$(CONFIG_PINCTRL_MESON_GXL) += pinctrl-meson-gxl.o
+ obj-$(CONFIG_PINCTRL_MESON8) += pinctrl-meson8.o
+ obj-$(CONFIG_PINCTRL_MESON8B) += pinctrl-meson8b.o
+-obj-$(CONFIG_PINCTRL_MESON_GXBB) += pinctrl-meson-gxbb.o
+-obj-$(CONFIG_PINCTRL_MESON_GXL) += pinctrl-meson-gxl.o
+ obj-$(CONFIG_PINCTRL_MESON_AXG_PMX) += pinctrl-meson-axg-pmx.o
+ obj-$(CONFIG_PINCTRL_MESON_AXG) += pinctrl-meson-axg.o
+ obj-$(CONFIG_PINCTRL_MESON_G12A) += pinctrl-meson-g12a.o
+--- a/drivers/pinctrl/meson/pinctrl-meson.c
++++ b/drivers/pinctrl/meson/pinctrl-meson.c
+@@ -152,7 +152,6 @@
+ 
+ 	return pc->data->num_funcs;
+ }
+-EXPORT_SYMBOL_GPL(meson_pmx_get_funcs_count);
+ 
+ const char *meson_pmx_get_func_name(struct pinctrl_dev *pcdev,
+ 				    unsigned selector)
+@@ -161,7 +160,6 @@
+ 
+ 	return pc->data->funcs[selector].name;
+ }
+-EXPORT_SYMBOL_GPL(meson_pmx_get_func_name);
+ 
+ int meson_pmx_get_groups(struct pinctrl_dev *pcdev, unsigned selector,
+ 			 const char * const **groups,
+@@ -174,7 +172,6 @@
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL_GPL(meson_pmx_get_groups);
+ 
+ static int meson_pinconf_set_gpio_bit(struct meson_pinctrl *pc,
+ 				      unsigned int pin,
+@@ -726,7 +723,6 @@
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL_GPL(meson8_aobus_parse_dt_extra);
+ 
+ int meson_a1_parse_dt_extra(struct meson_pinctrl *pc)
+ {
+@@ -736,7 +732,6 @@
+ 
+ 	return 0;
+ }
+-EXPORT_SYMBOL_GPL(meson_a1_parse_dt_extra);
+ 
+ int meson_pinctrl_probe(struct platform_device *pdev)
+ {
+@@ -771,6 +766,5 @@
+ 
+ 	return meson_gpiolib_register(pc);
+ }
+-EXPORT_SYMBOL_GPL(meson_pinctrl_probe);
+ 
+ MODULE_LICENSE("GPL v2");
+--- a/drivers/pinctrl/meson/pinctrl-meson8-pmx.c
++++ b/drivers/pinctrl/meson/pinctrl-meson8-pmx.c
+@@ -100,5 +100,4 @@
+ 	.get_function_groups = meson_pmx_get_groups,
+ 	.gpio_request_enable = meson8_pmx_request_gpio,
+ };
+-EXPORT_SYMBOL_GPL(meson8_pmx_ops);
+ MODULE_LICENSE("GPL v2");
