@@ -3,10 +3,10 @@
 
 PKG_NAME="x264"
 PKG_VERSION="ff620d0c3c4f717ab393892983d43458d27e4bed"
-PKG_SHA256="c6945fe9c3cdd7b0d2f89250ae696a51db59e3506af4d28d03616c9edd1e519b"
+PKG_SHA256="ec54eb99f26cd502623702037f80f851ce115576cf8529d496a3066eff7f4ded"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.videolan.org/developers/x264.html"
-PKG_URL="https://code.videolan.org/videolan/x264/-/archive/${PKG_VERSION}/x264-${PKG_VERSION}.tar.bz2"
+PKG_URL="https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/x264-${PKG_VERSION}.tar.bz2"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="x264 codec"
 
