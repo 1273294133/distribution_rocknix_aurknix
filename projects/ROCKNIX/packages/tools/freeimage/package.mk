@@ -5,10 +5,10 @@ PKG_NAME="freeimage"
 PKG_VERSION="3180"
 PKG_LICENSE="GPLv3"
 PKG_SITE="http://freeimage.sourceforge.net/"
-PKG_URL="https://deb.debian.org/debian/pool/main/f/freeimage/freeimage_3.18.0+ds2.orig.tar.xz"
-PKG_SHA256="4425d04d4691084260848d67eb79949ea7c129d85c73a72066ba609fd3f3aa39"
+PKG_URL="https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/danoli3.zip"
+PKG_SHA256="bf80ca15bba3072e8c7944da8b887bf8c3e654b382b589e28900fd381e9131c7"
 PKG_DEPENDS_TARGET="toolchain"
-PKG_SOURCE_DIR="FreeImage"
+PKG_SOURCE_DIR="FreeImage-master"
 PKG_LONGDESC="FreeImage library"
 
 pre_make_target() {
