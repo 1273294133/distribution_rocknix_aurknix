@@ -3,6 +3,10 @@
 
 . ${ROOT}/packages/devel/glib/package.mk
 
+# Force rebuild: stamp hashing must pick up the pc tool variable fix in the
+# global package.mk (8a59d87). Bump this value to force glib rebuild.
+PKG_STAMP="20260923-genmarshal-fix-v2"
+
 PKG_MESON_OPTS_HOST="-Ddefault_library=shared \
                      -Dinstalled_tests=false \
                      -Dlibmount=disabled \

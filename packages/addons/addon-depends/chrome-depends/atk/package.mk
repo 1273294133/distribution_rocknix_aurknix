@@ -20,8 +20,13 @@ pre_configure_target() {
   # which meson refuses during cross configure. Rewrite them in the shared sysroot
   # before atk's meson setup runs (belt & braces; glib post_makeinstall also does this
   # but only when glib is actually rebuilt).
-  sed -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" \
-      -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" \
-      -e "s#/usr/bin/gobject-query#${TOOLCHAIN}/bin/gobject-query#" \
-      -i "${PKG_ORIG_SYSROOT_PREFIX}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc 2>/dev/null || true
+  # NOTE: at pre_configure time SYSROOT_PREFIX is still the shared sysroot
+  # (it is redirected to a per-package sysroot only later in scripts/build),
+  # so use SYSROOT_PREFIX here, NOT PKG_ORIG_SYSROOT_PREFIX.
+  echo "atk pre_configure: rewriting glib pc tool vars in sysroot ${SYSROOT_PREFIX}"
+  find "${SYSROOT_PREFIX}/usr" -type f -name "*-2.0.pc" \( -name "glib-2.0.pc" -o -name "gio-2.0.pc" \) -print0 2>/dev/null |
+    xargs -0 -r sed -i -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" \
+                       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" \
+                       -e "s#/usr/bin/gobject-query#${TOOLCHAIN}/bin/gobject-query#"
+  grep -h "glib_genmarshal\|glib_mkenums" "${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc" 2>/dev/null || true
 }
