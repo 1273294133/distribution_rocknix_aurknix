@@ -14,3 +14,14 @@ PKG_BUILD_FLAGS="+pic"
 
 PKG_MESON_OPTS_TARGET="-Ddocs=false \
                        -Dintrospection=false"
+
+pre_configure_target() {
+  # glib 2.85+ ships pc tool variables expanded to host /usr/bin (glib_genmarshal etc),
+  # which meson refuses during cross configure. Rewrite them in the shared sysroot
+  # before atk's meson setup runs (belt & braces; glib post_makeinstall also does this
+  # but only when glib is actually rebuilt).
+  sed -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" \
+      -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" \
+      -e "s#/usr/bin/gobject-query#${TOOLCHAIN}/bin/gobject-query#" \
+      -i "${PKG_ORIG_SYSROOT_PREFIX}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc 2>/dev/null || true
+}

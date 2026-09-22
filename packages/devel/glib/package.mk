@@ -10,6 +10,7 @@ PKG_SITE="https://www.gtk.org/"
 PKG_URL="https://download.gnome.org/sources/glib/$(get_pkg_version_maj_min)/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="libffi:host pcre2:host Python3:host meson:host ninja:host"
 PKG_DEPENDS_TARGET="meson:host ninja:host gcc:host glib:host libffi pcre2 Python3:host util-linux zlib"
+PKG_STAMP="20260922-genmarshal-fix"
 PKG_LONGDESC="A library which includes support routines for C such as lists, trees, hashes, memory allocation."
 
 PKG_MESON_OPTS_HOST="-Ddefault_library=static \
