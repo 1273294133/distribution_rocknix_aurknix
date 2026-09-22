@@ -8,3 +8,5 @@ PKG_MESON_OPTS_HOST="-Ddefault_library=shared \
                      -Dlibmount=disabled \
                      -Dintrospection=disabled \
                      -Dtests=false"
+
+# ROCKNIX stamp bump: glib 2.85+ pc tool variables (glib_genmarshal/glib_mkenums) rewritten to toolchain in post_makeinstall_target (8a59d87). Changing this line changes the package stamp so glib is rebuilt.
