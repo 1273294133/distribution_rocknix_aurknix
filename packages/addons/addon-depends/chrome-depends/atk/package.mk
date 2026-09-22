@@ -24,9 +24,14 @@ pre_configure_target() {
   # (it is redirected to a per-package sysroot only later in scripts/build),
   # so use SYSROOT_PREFIX here, NOT PKG_ORIG_SYSROOT_PREFIX.
   echo "atk pre_configure: rewriting glib pc tool vars in sysroot ${SYSROOT_PREFIX}"
+  # glib pc ships glib_genmarshal=${bindir}/glib-genmarshal with bindir=/usr/bin;
+  # pkg-config expands ${bindir} to /usr/bin and meson rejects the host path.
+  # Rewrite both the ${bindir} variable references AND the bindir= definition.
   find "${SYSROOT_PREFIX}/usr" -type f -name "*-2.0.pc" \( -name "glib-2.0.pc" -o -name "gio-2.0.pc" \) -print0 2>/dev/null |
-    xargs -0 -r sed -i -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" \
-                       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" \
-                       -e "s#/usr/bin/gobject-query#${TOOLCHAIN}/bin/gobject-query#"
-  grep -h "glib_genmarshal\|glib_mkenums" "${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc" 2>/dev/null || true
+    xargs -0 -r sed -i -e "s#\${bindir}/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" \
+                       -e "s#\${bindir}/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" \
+                       -e "s#\${bindir}/gobject-query#${TOOLCHAIN}/bin/gobject-query#" \
+                       -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" \
+                       -e "s#bindir=\${prefix}/bin#bindir=${TOOLCHAIN}/bin#"
+  grep -h "glib_genmarshal\|glib_mkenums\|^bindir" "${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc" 2>/dev/null || true
 }
