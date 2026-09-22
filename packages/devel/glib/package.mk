@@ -38,5 +38,8 @@ post_makeinstall_target() {
   rm -rf ${INSTALL}/usr/share
 
   # glib binaries must be executed from toolchain
-  sed -e "s#bindir=\${prefix}/bin#bindir=${TOOLCHAIN}/bin#" -i "${SYSROOT_PREFIX}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc
+  # glib 2.85+ generates pc with bindir expanded to /usr/bin (host), so also rewrite
+  # the expanded form and the tool variables directly, otherwise downstream meson
+  # packages (atk etc) pick up host /usr/bin/glib-genmarshal and fail cross configure
+  sed -e "s#bindir=\${prefix}/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#"       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#"       -i "${SYSROOT_PREFIX}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc
 }
