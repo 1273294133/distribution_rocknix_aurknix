@@ -31,6 +31,23 @@ PKG_CMAKE_OPTS_TARGET+=" -DROCKNIX=1 \
                          -DUSE_SYSTEM_PUGIXML=1"
 
 pre_configure_target() {
+  # freeimage (danoli3 fork) installs no pkg-config file; its post_makeinstall
+  # generation may not run if the stamp skips the rebuild, so provide the pc
+  # here in the consuming package (shared sysroot at pre_configure time).
+  mkdir -p "${SYSROOT_PREFIX}/usr/lib/pkgconfig"
+  cat > "${SYSROOT_PREFIX}/usr/lib/pkgconfig/freeimage.pc" <<'FIEOF'
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: FreeImage
+Description: FreeImage - multi-format image loading library
+Version: 3.18.0
+Libs: -L${libdir} -lfreeimage
+Cflags: -I${includedir}
+FIEOF
+
   for key in SCREENSCRAPER_DEV_LOGIN \
         GAMESDB_APIKEY \
         CHEEVOS_DEV_LOGIN
