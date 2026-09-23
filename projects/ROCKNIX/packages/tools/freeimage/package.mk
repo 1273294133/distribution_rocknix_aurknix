@@ -15,3 +15,21 @@ pre_make_target() {
   export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++11 -fPIC -Wno-implicit-function-declaration"
   export CFLAGS="${CFLAGS} -DPNG_ARM_NEON_OPT=0 -fPIC -Wno-implicit-function-declaration"
 }
+
+post_makeinstall_target() {
+  # danoli3 fork Makefile installs lib + headers but no pkg-config file;
+  # emulationstation does find_package(freeimage) via pkg-config -> provide one.
+  mkdir -p "${INSTALL}/usr/lib/pkgconfig"
+  cat > "${INSTALL}/usr/lib/pkgconfig/freeimage.pc" <<'EOF'
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: FreeImage
+Description: FreeImage - multi-format image loading library
+Version: 3.18.0
+Libs: -L${libdir} -lfreeimage
+Cflags: -I${includedir}
+EOF
+}
