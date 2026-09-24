@@ -27,6 +27,11 @@ pre_make_target() {
   # so it must run from the source root. PKG_BUILD is only defined at run time
   # (empty at package.mk parse time), so set PKG_MAKE_OPTS_TARGET here.
   PKG_MAKE_OPTS_TARGET="-C ${PKG_BUILD} -f Makefile.gnu"
+  # make install also runs in PKG_REAL_BUILD (no Makefile) -> No rule to make
+  # target 'install'; point it at the source root too. Makefile.gnu install
+  # supports DESTDIR (DESTDIR ?= /, INCDIR=$(DESTDIR)/usr/include, no -o root)
+  # and creates the libfreeimage.so -> .so.3 -> 3.19.so symlink chain.
+  PKG_MAKEINSTALL_OPTS_TARGET="-C ${PKG_BUILD} -f Makefile.gnu"
   # danoli3 fork bundles OpenEXR 3.x which needs C++14+ (std::enable_if_t);
   # -std=c++11 breaks it. Must set std explicitly: Makefile.gnu uses
   # 'CXXFLAGS ?= ...' so a pre-set env CXXFLAGS would skip the -std default.
