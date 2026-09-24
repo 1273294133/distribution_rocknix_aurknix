@@ -10,7 +10,16 @@ PKG_SHA256="b491c0e16a6449b8a42e89fceca5866a61d944a2a2e8b3c7869e49c4220b1538"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SOURCE_DIR="FreeImage-master"
 PKG_LONGDESC="FreeImage library"
-PKG_STAMP="danoli3-fixed-20260924"
+PKG_STAMP="danoli3-fixed-make-20260924"
+
+# danoli3 fork ships BOTH CMakeLists.txt and Makefile.gnu; ROCKNIX auto-detect
+# picks cmake, whose FREEIMAGE_STATIC default=ON builds a static libFreeImage.a
+# (capital I) - but emulationstation FindFreeImage does find_library(NAMES
+# freeimage freeimageLib) i.e. libfreeimage.so (lowercase), so the shared lib
+# never exists -> "Required library FreeImage not found" despite pc+headers.
+# Force the GNU make build (Makefile -> Makefile.gnu -> libfreeimage-3.19.so
+# + libfreeimage.so symlink), matching what emulationstation expects.
+PKG_TOOLCHAIN="make"
 
 pre_make_target() {
   export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++11 -fPIC -Wno-implicit-function-declaration"
@@ -18,11 +27,9 @@ pre_make_target() {
 }
 
 post_makeinstall_target() {
-  # danoli3 fork Makefile installs no pkg-config file; its install target used
-  # `install -o root -g root` which fails chown on non-root GitHub runners, so
-  # the lib/header lines never ran and only the .pc mattered - but the .so was
-  # missing from sysroot. Fixed zip (danoli3-fixed.zip) drops the -o/-g; we also
-  # copy lib+header directly from the build dir as a deterministic fallback.
+  # Makefile.gnu install (danoli3-fixed.zip drops -o root chown) produces
+  # libfreeimage-3.19.so + symlinks in the pkg sysroot; copy lib+header as a
+  # deterministic fallback and die if the shared lib is missing.
   if ! ls "${PKG_BUILD}"/libfreeimage-*.so* >/dev/null 2>&1; then
     echo "ERROR: freeimage shared library not produced by make"
     die "freeimage build did not create libfreeimage.so (check make output in thread log)"
