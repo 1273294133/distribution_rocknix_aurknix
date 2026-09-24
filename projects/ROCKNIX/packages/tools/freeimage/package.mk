@@ -20,6 +20,10 @@ PKG_STAMP="danoli3-fixed-make-20260924"
 # Force the GNU make build (Makefile -> Makefile.gnu -> libfreeimage-3.19.so
 # + libfreeimage.so symlink), matching what emulationstation expects.
 PKG_TOOLCHAIN="make"
+# ROCKNIX runs make inside PKG_REAL_BUILD (./.aarch64-rocknix-linux-gnu) which
+# has no Makefile; Makefile.gnu also uses relative paths (Source/, Wrapper/)
+# so it must run from the source root. -C ${PKG_BUILD} -f Makefile.gnu does that.
+PKG_MAKE_OPTS_TARGET="-C ${PKG_BUILD} -f Makefile.gnu"
 
 pre_make_target() {
   export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++11 -fPIC -Wno-implicit-function-declaration"
