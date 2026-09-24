@@ -27,7 +27,10 @@ pre_make_target() {
   # so it must run from the source root. PKG_BUILD is only defined at run time
   # (empty at package.mk parse time), so set PKG_MAKE_OPTS_TARGET here.
   PKG_MAKE_OPTS_TARGET="-C ${PKG_BUILD} -f Makefile.gnu"
-  export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++11 -fPIC -Wno-implicit-function-declaration"
+  # danoli3 fork bundles OpenEXR 3.x which needs C++14+ (std::enable_if_t);
+  # -std=c++11 breaks it. Must set std explicitly: Makefile.gnu uses
+  # 'CXXFLAGS ?= ...' so a pre-set env CXXFLAGS would skip the -std default.
+  export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++17 -fPIC -Wno-implicit-function-declaration"
   export CFLAGS="${CFLAGS} -DPNG_ARM_NEON_OPT=0 -fPIC -Wno-implicit-function-declaration"
 }
 
