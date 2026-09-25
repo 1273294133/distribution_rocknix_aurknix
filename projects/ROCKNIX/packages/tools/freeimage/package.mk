@@ -10,7 +10,7 @@ PKG_SHA256="b491c0e16a6449b8a42e89fceca5866a61d944a2a2e8b3c7869e49c4220b1538"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_SOURCE_DIR="FreeImage-master"
 PKG_LONGDESC="FreeImage library"
-PKG_STAMP="danoli3-fixed-make-20260924"
+PKG_STAMP="danoli3-fixed-make-20260926-srcs17"
 
 # danoli3 fork ships BOTH CMakeLists.txt and Makefile.gnu; ROCKNIX auto-detect
 # picks cmake, whose FREEIMAGE_STATIC default=ON builds a static libFreeImage.a
@@ -37,6 +37,18 @@ pre_make_target() {
   # 'CXXFLAGS ?= ...' so a pre-set env CXXFLAGS would skip the -std default.
   export CXXFLAGS="${CXXFLAGS} -Wno-narrowing -std=c++17 -fPIC -Wno-implicit-function-declaration"
   export CFLAGS="${CFLAGS} -DPNG_ARM_NEON_OPT=0 -fPIC -Wno-implicit-function-declaration"
+  # danoli3 fork's Makefile.srcs SRCS list omits bundled sources that the
+  # linked consumers need (emulationstation links with -Wl,--no-undefined):
+  # LibWebP palette + sharpyuv (WebPGetColorPalette/SharpYuv*) and LibRawLite
+  # decoders/write (olympus_load_raw/sony_ycbcr_load_raw/panasonicC8_load_raw,
+  # losslessjpeg, libraw_c_api, apply_profile, tiff_writer). Without them
+  # libfreeimage.so itself carries undefined symbols -> link error. The *_ph.cpp
+  # stubs (write_ph/postprocessing_ph/preprocessing_ph) are deliberately NOT
+  # added: they duplicate symbols already present (file_write.cpp,
+  # postprocessing_utils.cpp, raw2image.cpp etc) - verified locally as
+  # 'multiple definition'. LibRawLite defines NO_LCMS internally (defines.h)
+  # so apply_profile.cpp compiles its no-op path without lcms2.h.
+  sed -i 's|^SRCS = .*|& ./Source/LibWebP/src/utils/palette.c ./Source/LibWebP/src/dsp/lossless_avx2.c ./Source/LibWebP/src/dsp/lossless_enc_avx2.c ./Source/LibWebP/sharpyuv/sharpyuv.c ./Source/LibWebP/sharpyuv/sharpyuv_cpu.c ./Source/LibWebP/sharpyuv/sharpyuv_csp.c ./Source/LibWebP/sharpyuv/sharpyuv_dsp.c ./Source/LibWebP/sharpyuv/sharpyuv_gamma.c ./Source/LibWebP/sharpyuv/sharpyuv_neon.c ./Source/LibWebP/sharpyuv/sharpyuv_sse2.c ./Source/LibRawLite/src/decoders/olympus14.cpp ./Source/LibRawLite/src/decoders/pana8.cpp ./Source/LibRawLite/src/decoders/sonycc.cpp ./Source/LibRawLite/src/decompressors/losslessjpeg.cpp ./Source/LibRawLite/src/libraw_c_api.cpp ./Source/LibRawLite/src/write/apply_profile.cpp ./Source/LibRawLite/src/write/tiff_writer.cpp|' "${PKG_BUILD}/Makefile.srcs"
 }
 
 post_makeinstall_target() {
