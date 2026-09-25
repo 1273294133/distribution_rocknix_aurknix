@@ -51,7 +51,11 @@ post_makeinstall_target() {
   cp -f "${PKG_BUILD}/Source/FreeImage.h" "${SYSROOT_PREFIX}/usr/include/"
   cp -f "${PKG_BUILD}"/libfreeimage-*.so* "${SYSROOT_PREFIX}/usr/lib/" 2>/dev/null || true
   cp -f "${PKG_BUILD}/libfreeimage.a" "${SYSROOT_PREFIX}/usr/lib/" 2>/dev/null || true
-  ln -sfn "lib$(ls "${PKG_BUILD}" | grep -o 'libfreeimage-[0-9.]*\.so' | head -1)" \
+  # NOTE: grep -o already yields "libfreeimage-3.19.so"; the previous
+  # "lib$(...)" prefix produced a broken "liblibfreeimage-3.19.so" symlink,
+  # so ld could not resolve -lfreeimage to the .so and fell back to the
+  # static .a (C++ runtime symbols missing) -> SDL2/drastic_adv link failure.
+  ln -sfn "$(ls "${PKG_BUILD}" | grep -o 'libfreeimage-[0-9.]*\.so' | head -1)" \
     "${SYSROOT_PREFIX}/usr/lib/libfreeimage.so" 2>/dev/null || true
   cat > "${SYSROOT_PREFIX}/usr/lib/pkgconfig/freeimage.pc" <<'FIEOF'
 prefix=/usr
