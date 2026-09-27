@@ -45,8 +45,10 @@ dtb-y += sc2_s905x4_x96_x4_4g_1gbit.dtb
 
 # GXL/GXBB device trees (from CoreELEC linux-amlogic mainline arch, CONFIG_ARCH_MESON=y)
 # S905L/S905X/S905D/S805X/S905W boxes - dtb.img switch: copy device_trees/meson-gxl-s905x-p212.dtb to dtb.img
+# slowemmc variant: 1GB slow-eMMC S905L boxes hang at HS200 - cap eMMC at 50MHz
 dtb-y += meson-gxbb-p201.dtb
 dtb-y += meson-gxl-s905x-p212.dtb
+dtb-y += meson-gxl-s905x-p212-slowemmc.dtb
 dtb-y += meson-gxl-s905x-khadas-vim.dtb
 dtb-y += meson-gxl-s905x-nexbox-a95x.dtb
 dtb-y += meson-gxl-s905x-libretech-cc.dtb
