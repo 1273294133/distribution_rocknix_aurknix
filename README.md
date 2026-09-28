@@ -3,16 +3,16 @@
 > ### ⚡ 本仓库是 **AURKNIX 的 AI 魔改版**：在 [AURKNIX (AveyondFly/distribution_rocknix)](https://github.com/AveyondFly/distribution_rocknix) 基础上深度魔改，用于**兼容老晶晨（Amlogic）芯片**设备（S905 / S905L / GXL 平台电视盒子等），并提供可直接刷写的固件镜像（能用就行，暂无持续更新维护）。
 
 [![Amlogic S905 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=nightly*&label=Amlogic%20S905%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/nightly-20260926)
-[![RK3326 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=RK3326%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918)
+[![R36S 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=R36S%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918)
 
-> ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者手头只有 **S905L 电视盒子** 和 **R36S 寨机**（RK3326）两类设备，因此仅对这两类做了实机适配与验证；其他型号（如 S905X / S905M / S905D 等衍生型号）理论上兼容，但**未经实机测试**，刷机前请自行评估风险。
+> ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者手头只有 **S905L 电视盒子** 和 **R36S 寨机**两类设备，因此仅对这两类做了实机适配与验证；其他型号（如 S905X / S905M / S905D 等衍生型号）理论上兼容，但**未经实机测试**，刷机前请自行评估风险。
 
 ### 📥 固件下载 / Firmware Downloads
 
 | 目标设备 | 最新固件 |
 |---|---|
 | **Amlogic S905 / S905L 电视盒子**（AURKNIX S905 aarch64 镜像） | [![S905 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20S905%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/nightly-20260926) |
-| **RK3326 掌机**（R36S / RGB10 / XU10 等，AURKNIX RK3326 aarch64 镜像） | [![RK3326 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20RK3326%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918) |
+| **R36S 掌机**（R36S / RGB10 / XU10 等，AURKNIX R36S aarch64 镜像） | [![R36S 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20R36S%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20260918) |
 | 查看全部历史版本 | [![全部 Release](https://img.shields.io/badge/%E5%85%A8%E9%83%A8%20Release-64748b?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases) |
 
 > **S905/S905L 盒子刷机提示（新版镜像）**：镜像写 SD 卡后从 SD 卡启动（链式引导，不动盒子内置系统）。镜像 FAT 分区含 `device_trees/` 目录（全套 amlogic dtb），**S905L 无后缀盒子把 `device_trees/meson-gxl-s905x-p212.dtb` 复制为根目录 `DTB.IMG`**（替换原单文件 dtb.img）；如启动异常可依次尝试 `meson-gxbb-p201.dtb`、`meson-gxl-s905d-p231.dtb`、`meson-gxl-s805x-p241.dtb`。
@@ -30,7 +30,7 @@ This repository is **forked from [AveyondFly/distribution_rocknix](https://githu
 This fork adds support for devices and emulators not included in the official distribution, and additionally provides **buildable firmware images** (no continuous maintenance commitment) for:
 
 - **Amlogic S905 / S905L TV boxes** (aarch64 image, see download button above) — uses the CoreELEC linux-amlogic kernel with the full Amlogic device-tree set
-- **RK3326 handhelds** (R36S, RGB10, XU10, etc., see download button above)
+- **R36S handhelds** (R36S, RGB10, XU10, etc., see download button above)
 
 > **Note — device support requests:** Please **do not** open issues asking for support for devices not listed in this README. New device support depends entirely on whether a vendor or community member **donates a development unit**. Maintainers cannot reliably port to hardware they do not have — guessing from specs or marketing photos is not a viable path to a working image.
 
@@ -47,7 +47,7 @@ This fork adds support for devices and emulators not included in the official di
 - **mrp** (mrp-sa): MRP Games (feature phone game format)
 - **krkr2** (krkr2-sa): Kirikiri2 visual novel engine
 - **ONScripter** (onscripter-lr / onscripter-sa): Visual novel engine (libretro + standalone)
-- **ppsspp2021-sa**: PPSSPP 2021 standalone (default PSP on RK3326 / RK3566 / RK356X)
+- **ppsspp2021-sa**: PPSSPP 2021 standalone (default PSP on R36S / RK3566 / RK356X)
 - **PyMO/cpymo**: PyMO AVG game engine in C
 - **free-j2me**: J2ME SDL2 frontend standalone
 - **OpenBOR-ff**: OpenBOR-ff variant
@@ -69,7 +69,7 @@ Independent ports apps:
 
 ### Additional Supported Devices
 
-#### RK3326 Devices (unified image)
+#### R36S Devices (unified image)
 | Brand | Models |
 |-------|--------|
 | BatleXP | G350 |
@@ -153,7 +153,7 @@ Use `/flash/dtbselect` (Linux) or `DtbselectWin64.exe` (Windows) on the boot par
 * Device to device and device to cloud sync with Syncthing and rclone.
 * VPN support with Wireguard, Tailscale, and ZeroTier.
 * Includes built-in support for scraping and retroachievements.
-* Screen color adjustment (brightness / contrast / saturation / hue) on RK3326, RK3326S, RK3566, and RK356X devices.
+* Screen color adjustment (brightness / contrast / saturation / hue) on R36S, RK3326S, RK3566, and RK356X devices.
 
 ## User manuals
 
@@ -164,11 +164,11 @@ Guides for this fork live in [`documentation/user_man/`](documentation/user_man/
 Pull requests can request **automatic image builds** in GitHub Actions. Add a `build:` line to the PR description (the [PR template](.github/PULL_REQUEST_TEMPLATE.md) includes this section by default):
 
 ```
-build:RK3326/RK3566
+build:R36S/RK3566
 ```
 
-- **Supported devices:** `RK3326`, `RK3326S`, `RK3566`, `S905`, `RK356X`
-- **Multiple devices:** separate with `/`, `,`, `;`, or spaces (e.g. `build:RK3326/RK3566`)
+- **Supported devices:** `R36S`, `RK3326S`, `RK3566`, `S905`, `RK356X`
+- **Multiple devices:** separate with `/`, `,`, `;`, or spaces (e.g. `build:R36S/RK3566`)
 - **All devices:** `build:ALL`
 - **Skip builds:** leave `build:` empty or omit the line
 

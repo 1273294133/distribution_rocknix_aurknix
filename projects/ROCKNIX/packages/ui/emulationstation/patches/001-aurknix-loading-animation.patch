@@ -210,32 +210,49 @@
  ViewController* ViewController::sInstance = nullptr;
  
  ViewController* ViewController::get()
-@@ -567,7 +572,16 @@
+@@ -565,9 +570,29 @@
+ 	mLockInput = true;
+ 
  	GuiComponent::isLaunchTransitionRunning = true;
- 		
+-		
++
++	// AURKNIX: number of loading-animation loops to play before a game starts
++	// (0 disables the animation entirely). Read once here so all three
++	// transition styles share the same value.
++	const int loadingRounds = Settings::getInstance()->getInt("GameLoadingAnimationRounds");
++
++	// AURKNIX: custom loading animation file (empty falls back to the default
++	// shipping animation). Read once here as well.
++	std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
++	if (loadingGif.empty())
++		loadingGif = LAUNCH_LOADING_GIF;
++
  	if (!Settings::getInstance()->getBool("HideWindow"))
 -		mWindow->setCustomSplashScreen(game->getImagePath(), game->getName(), game);
 +	{
 +		// AURKNIX: use the loading animation as the splash shown while the
 +		// game loads (falls back to the game cover art when disabled).
 +		std::string splashImage = game->getImagePath();
-+		if (Settings::getInstance()->getBool("GameLoadingAnimation") &&
-+			Utils::FileSystem::exists(LAUNCH_LOADING_GIF))
-+			splashImage = LAUNCH_LOADING_GIF;
++		if (loadingRounds > 0 &&
++			Utils::FileSystem::exists(loadingGif))
++			splashImage = loadingGif;
 +
 +		mWindow->setCustomSplashScreen(splashImage, game->getName(), game);
 +	}
  
  	std::string transition_style = Settings::GameTransitionStyle();
  	if (transition_style.empty() || transition_style == "auto")
-@@ -597,6 +611,27 @@
+@@ -595,8 +620,29 @@
+ 		// fade out, launch game, fade back in
+ 		auto fadeFunc = [this](float t) { mFadeOpacity = Math::lerp(0.0f, 1.0f, t); };
  
- 		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options]
+-		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options]
++		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options, loadingRounds]
  		{
-+			// AURKNIX: play the loading animation for one loop before the game starts
-+			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			// AURKNIX: play the loading animation for the configured loops before the game starts
++			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
 +			{
-+				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, game, fadeFunc, options]
++				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, game, fadeFunc, options]
 +				{
 +					if (doLaunchGame(game, options))
 +					{
@@ -256,16 +273,18 @@
  			if (doLaunchGame(game, options))
  			{
  				GuiComponent::isLaunchTransitionRunning = false;
-@@ -616,7 +651,29 @@
+@@ -615,8 +661,30 @@
+ 	{
  		int slideDuration = (transition_style == "fast slide") ? 750 : 1500; // Halve the duration for fast slide
  		// move camera to zoom in on center + fade out, launch game, come back in
- 		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options]
+-		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options]
 -		{			
++		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options, loadingRounds]
 +		{
-+			// AURKNIX: play the loading animation for one loop before the game starts
-+			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			// AURKNIX: play the loading animation for the configured loops before the game starts
++			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
 +			{
-+				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
++				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
 +				{
 +					if (doLaunchGame(game, options))
 +					{
@@ -287,16 +306,18 @@
  			if (doLaunchGame(game, options))
  			{
  				GuiComponent::isLaunchTransitionRunning = false;
-@@ -635,7 +692,29 @@
+@@ -634,8 +702,30 @@
+ 	} 
  	else // instant
  	{ 		
- 		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options]
+-		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options]
 -		{			
++		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options, loadingRounds]
 +		{
-+			// AURKNIX: play the loading animation for one loop before the game starts
-+			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			// AURKNIX: play the loading animation for the configured loops before the game starts
++			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
 +			{
-+				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
++				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
 +				{
 +					if (doLaunchGame(game, options))
 +					{
@@ -318,3 +339,32 @@
  			if (doLaunchGame(game, options))
  			{
  				GuiComponent::isLaunchTransitionRunning = false;
+
+--- a/es-app/src/guis/GuiMenu.cpp
++++ b/es-app/src/guis/GuiMenu.cpp
+@@ -4171,6 +4171,25 @@
+ 
+ 	s->addEntry(_("MOONLIGHT GAME STREAMING"), false, [this, window] { GuiMoonlight::show(mWindow); });
+ 
++	// AURKNIX: game loading animation (loops to play before a game starts; 0 = off)
++	{
++		auto loadingAnimation = std::make_shared<OptionListComponent<std::string>>(mWindow, _("游戏加载动画"));
++		loadingAnimation->addRange({
++			{ _("关闭"), "0" },
++			{ _("1 轮（约3秒）"), "1" },
++			{ _("2 轮（约6秒）"), "2" },
++			{ _("3 轮（约9秒）"), "3" } },
++			std::to_string(Settings::getInstance()->getInt("GameLoadingAnimationRounds")));
++		s->addWithDescription(_("游戏加载动画"), _("启动游戏前播放 AURKNIX 加载动画，按设定的轮数循环播放，播完进入游戏。"), loadingAnimation);
++		s->addSaveFunc([loadingAnimation] { Settings::getInstance()->setInt("GameLoadingAnimationRounds", std::stoi(loadingAnimation->getSelected())); });
++
++		// AURKNIX: optional custom GIF for the game loading animation
++		std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
++		if (loadingGif.empty())
++			Settings::getInstance()->setString("GameLoadingAnimationFile", "/usr/config/emulationstation/loading.gif");
++		s->addFileBrowser(_("自定义加载动画文件"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true);
++	}
++
+ 	if (SystemConf::getInstance()->getBool("global.retroachievements") && !Settings::getInstance()->getBool("RetroachievementsMenuitem") && SystemConf::getInstance()->get("global.retroachievements.username") != "")
+ 	{
+ 		s->addEntry(_("RETROACHIEVEMENTS").c_str(), true, [this] 

@@ -101,8 +101,10 @@ makeinstall_target() {
   sed -i 's|</config>|  <bool name="EnableSounds" value="true" />\n</config>|' \
     ${INSTALL}/usr/config/emulationstation/es_settings.cfg
 
-  # AURKNIX: play the loading animation before a game starts (default on)
-  sed -i 's|</config>|  <bool name="GameLoadingAnimation" value="true" />\n</config>|' \
+  # AURKNIX: play the loading animation before a game starts (default 1 loop)
+  sed -i 's|</config>|  <int name="GameLoadingAnimationRounds" value="1" />\n</config>|' \
+    ${INSTALL}/usr/config/emulationstation/es_settings.cfg
+  sed -i 's|</config>|  <string name="GameLoadingAnimationFile" value="/usr/config/emulationstation/loading.gif" />\n</config>|' \
     ${INSTALL}/usr/config/emulationstation/es_settings.cfg
 
   # AURKNIX: ship the game-loading animation (animated splash source)
