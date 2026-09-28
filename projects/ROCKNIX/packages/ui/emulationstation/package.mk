@@ -101,6 +101,13 @@ makeinstall_target() {
   sed -i 's|</config>|  <bool name="EnableSounds" value="true" />\n</config>|' \
     ${INSTALL}/usr/config/emulationstation/es_settings.cfg
 
+  # AURKNIX: play the loading animation before a game starts (default on)
+  sed -i 's|</config>|  <bool name="GameLoadingAnimation" value="true" />\n</config>|' \
+    ${INSTALL}/usr/config/emulationstation/es_settings.cfg
+
+  # AURKNIX: ship the game-loading animation (animated splash source)
+  cp ${PKG_DIR}/config/common/loading.gif ${INSTALL}/usr/config/emulationstation/loading.gif
+
   # Add device-specific settings for S905
   if [ "${DEVICE}" = "S905" ]; then
     sed -i 's|</config>|  <bool name="BackgroundJoystickInput" value="true" />\n</config>|' \

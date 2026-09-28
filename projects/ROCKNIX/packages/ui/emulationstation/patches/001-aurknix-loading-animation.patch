@@ -1,0 +1,320 @@
+--- a/es-core/src/Splash.h
++++ b/es-core/src/Splash.h
+@@ -38,4 +38,16 @@
+ 	std::shared_ptr<TextureResource> mTexture;
+ 
+ 	std::vector<GuiComponent*> mExtras;
++
++	// AURKNIX: animated GIF splash support (used as the game-loading splash).
++	bool				mAnimated;
++	std::vector<unsigned int> mAnimTextures;
++	unsigned int		mAnimW;
++	unsigned int		mAnimH;
++	int					mAnimCount;
++	int					mAnimCurrent;
++	unsigned int		mAnimStartTick;
++	unsigned int		mAnimFrameMs;
++
++	bool loadGifAnimation(const std::string& path);
+ } ;
+
+--- a/es-core/src/Splash.cpp
++++ b/es-core/src/Splash.cpp
+@@ -3,9 +3,78 @@
+ #include "Window.h"
+ #include "resources/TextureResource.h"
+ #include "components/NinePatchComponent.h"
++#include "utils/StringUtil.h"
++#include "utils/FileSystemUtil.h"
+ #include <algorithm>
+ #include <SDL_events.h>
++#include <SDL_timer.h>
++#include <FreeImage.h>
+ #include "BindingManager.h"
++#include "renderers/Renderer.h"
++
++// AURKNIX: load an animated GIF into per-frame GL textures. FreeImage 32-bit
++// pixels are stored BGRA in memory, the renderer expects RGBA.
++bool Splash::loadGifAnimation(const std::string& path)
++{
++	FIMULTIBITMAP* mb = FreeImage_OpenMultiBitmap(FIF_GIF, path.c_str(), true, false, GIF_PLAYBACK);
++	if (mb == nullptr)
++		return false;
++
++	int pages = FreeImage_GetPageCount(mb);
++	if (pages <= 0)
++	{
++		FreeImage_CloseMultiBitmap(mb, 0);
++		return false;
++	}
++
++	bool first = true;
++	for (int i = 0; i < pages; i++)
++	{
++		FIBITMAP* page = FreeImage_LockPage(mb, i);
++		if (page == nullptr)
++			continue;
++
++		FIBITMAP* conv = FreeImage_ConvertTo32Bits(page);
++		if (conv != nullptr)
++		{
++			unsigned int w = FreeImage_GetWidth(conv);
++			unsigned int h = FreeImage_GetHeight(conv);
++			if (first)
++			{
++				mAnimW = w;
++				mAnimH = h;
++				first = false;
++			}
++			BYTE* bits = FreeImage_GetBits(conv);
++
++			std::vector<unsigned char> rgba(w * h * 4);
++			for (unsigned int k = 0; k < w * h; k++)
++			{
++				rgba[k * 4 + 0] = bits[k * 4 + FI_RGBA_RED];
++				rgba[k * 4 + 1] = bits[k * 4 + FI_RGBA_GREEN];
++				rgba[k * 4 + 2] = bits[k * 4 + FI_RGBA_BLUE];
++				rgba[k * 4 + 3] = bits[k * 4 + FI_RGBA_ALPHA];
++			}
++
++			unsigned int tid = Renderer::createTexture(Texture::RGBA, true, false, w, h, rgba.data());
++			if (tid != 0)
++				mAnimTextures.push_back(tid);
++
++			FreeImage_Unload(conv);
++		}
++		FreeImage_UnlockPage(mb, page, false);
++	}
++	FreeImage_CloseMultiBitmap(mb, 0);
++
++	if (mAnimTextures.empty())
++		return false;
++
++	mAnimCount = (int)mAnimTextures.size();
++	mAnimCurrent = 0;
++	mAnimStartTick = SDL_GetTicks();
++	mAnimFrameMs = 57; // AURKNIX loading animation is 49 frames @ 57 ms/frame (~2.8 s loop)
++	return true;
++}
+ 
+ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGround, IBindable* bindable) :
+ 	mBackground(window),
+@@ -17,6 +86,12 @@
+ 	mRoundCorners = 0.01;
+ 	mPercent = -1;
+ 
++	mAnimated = false;
++	mAnimCount = 0;
++	mAnimCurrent = 0;
++	mAnimStartTick = 0;
++	mAnimFrameMs = 57;
++
+ 	bool useOldSplashLayout = OLD_SPLASH_LAYOUT;
+ 
+ 	// Theme
+@@ -233,12 +308,22 @@
+ 
+ 	// Don't waste time in waiting for vsync
+ 	SDL_GL_SetSwapInterval(0);
++
++	// AURKNIX: if the splash image is an animated GIF, decode it into
++	// per-frame textures so it can be played while a game is loading.
++	if (mAnimated == false && Utils::String::toLower(Utils::FileSystem::getExtension(image)) == ".gif")
++		mAnimated = loadGifAnimation(image);
+ }
+ 
+ Splash::~Splash()
+ {
+ 	Renderer::setSwapInterval();
+ 
++	for (auto tex : mAnimTextures)
++		Renderer::destroyTexture(tex);
++
++	mAnimTextures.clear();
++
+ 	for (auto extra : mExtras)
+ 		delete extra;
+ 
+@@ -264,6 +349,55 @@
+ 	Renderer::setMatrix(trans);
+ 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), (mBackgroundColor & 0xFFFFFF00) | alpha);
+ 
++	// AURKNIX: animated GIF mode — draw the current frame (4:3, centered) and
++	// skip the static background / progress UI.
++	if (mAnimated && !mAnimTextures.empty())
++	{
++		unsigned int now = SDL_GetTicks();
++		if (mAnimStartTick == 0)
++			mAnimStartTick = now;
++		int frame = (int)((now - mAnimStartTick) / mAnimFrameMs);
++		mAnimCurrent = frame % mAnimCount;
++
++		Renderer::bindTexture(mAnimTextures[mAnimCurrent]);
++
++		float sw = (float)Renderer::getScreenWidth();
++		float sh = (float)Renderer::getScreenHeight();
++		float vw, vh;
++		if (sw / sh > 4.0f / 3.0f)
++		{
++			vh = sh;
++			vw = sh * 4.0f / 3.0f;
++		}
++		else
++		{
++			vw = sw;
++			vh = sw * 3.0f / 4.0f;
++		}
++		float ox = (sw - vw) / 2.0f;
++		float oy = (sh - vh) / 2.0f;
++
++		unsigned int col = 0xFFFFFF00 | alpha;
++		Vertex vertices[4];
++		vertices[0] = Vertex(Vector2f(ox, oy), Vector2f(0, 0), col);
++		vertices[1] = Vertex(Vector2f(ox + vw, oy), Vector2f(1, 0), col);
++		vertices[2] = Vertex(Vector2f(ox + vw, oy + vh), Vector2f(1, 1), col);
++		vertices[3] = Vertex(Vector2f(ox, oy + vh), Vector2f(0, 1), col);
++
++		Renderer::drawTriangleStrips(vertices, 4);
++
++		if (swapBuffers)
++		{
++			Renderer::swapBuffers();
++
++#if defined(_WIN32)
++			SDL_Event event;
++			while (SDL_PollEvent(&event));
++#endif
++		}
++		return;
++	}
++
+ 	for (auto extra : mExtras)
+ 		extra->setOpacity(alpha);
+ 
+
+--- a/es-app/src/views/ViewController.cpp
++++ b/es-app/src/views/ViewController.cpp
+@@ -28,10 +28,15 @@
+ #include "guis/GuiMsgBox.h"
+ #include "utils/ThreadPool.h"
+ #include <SDL_timer.h>
++#include "utils/FileSystemUtil.h"
+ #include "TextToSpeech.h"
+ #include "VolumeControl.h"
+ #include "guis/GuiNetPlay.h"
+ 
++// AURKNIX: path of the game-loading animation displayed before a game starts.
++#define LAUNCH_LOADING_GIF "/usr/config/emulationstation/loading.gif"
++#define LAUNCH_LOADING_HOLD_MS 2800
++
+ ViewController* ViewController::sInstance = nullptr;
+ 
+ ViewController* ViewController::get()
+@@ -567,7 +572,16 @@
+ 	GuiComponent::isLaunchTransitionRunning = true;
+ 		
+ 	if (!Settings::getInstance()->getBool("HideWindow"))
+-		mWindow->setCustomSplashScreen(game->getImagePath(), game->getName(), game);
++	{
++		// AURKNIX: use the loading animation as the splash shown while the
++		// game loads (falls back to the game cover art when disabled).
++		std::string splashImage = game->getImagePath();
++		if (Settings::getInstance()->getBool("GameLoadingAnimation") &&
++			Utils::FileSystem::exists(LAUNCH_LOADING_GIF))
++			splashImage = LAUNCH_LOADING_GIF;
++
++		mWindow->setCustomSplashScreen(splashImage, game->getName(), game);
++	}
+ 
+ 	std::string transition_style = Settings::GameTransitionStyle();
+ 	if (transition_style.empty() || transition_style == "auto")
+@@ -597,6 +611,27 @@
+ 
+ 		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options]
+ 		{
++			// AURKNIX: play the loading animation for one loop before the game starts
++			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			{
++				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, game, fadeFunc, options]
++				{
++					if (doLaunchGame(game, options))
++					{
++						GuiComponent::isLaunchTransitionRunning = false;
++
++						Window* w = mWindow;
++						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
++					}
++					else
++					{
++						setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
++						this->onFileChanged(game, FILE_METADATA_CHANGED);
++					}
++				}, true, 3);
++				return;
++			}
++
+ 			if (doLaunchGame(game, options))
+ 			{
+ 				GuiComponent::isLaunchTransitionRunning = false;
+@@ -616,7 +651,29 @@
+ 		int slideDuration = (transition_style == "fast slide") ? 750 : 1500; // Halve the duration for fast slide
+ 		// move camera to zoom in on center + fade out, launch game, come back in
+ 		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options]
+-		{			
++		{
++			// AURKNIX: play the loading animation for one loop before the game starts
++			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			{
++				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
++				{
++					if (doLaunchGame(game, options))
++					{
++						GuiComponent::isLaunchTransitionRunning = false;
++
++						Window* w = mWindow;
++						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
++					}
++					else
++					{
++						mCamera = origCamera;
++						setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
++						this->onFileChanged(game, FILE_METADATA_CHANGED);
++					}
++				}, true, 3);
++				return;
++			}
++
+ 			if (doLaunchGame(game, options))
+ 			{
+ 				GuiComponent::isLaunchTransitionRunning = false;
+@@ -635,7 +692,29 @@
+ 	else // instant
+ 	{ 		
+ 		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options]
+-		{			
++		{
++			// AURKNIX: play the loading animation for one loop before the game starts
++			if (Settings::getInstance()->getBool("GameLoadingAnimation") && !Settings::getInstance()->getBool("HideWindow"))
++			{
++				setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
++				{
++					if (doLaunchGame(game, options))
++					{
++						GuiComponent::isLaunchTransitionRunning = false;
++
++						Window* w = mWindow;
++						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
++					}
++					else
++					{
++						mCamera = origCamera;
++						setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
++						this->onFileChanged(game, FILE_METADATA_CHANGED);
++					}
++				}, true, 3);
++				return;
++			}
++
+ 			if (doLaunchGame(game, options))
+ 			{
+ 				GuiComponent::isLaunchTransitionRunning = false;
