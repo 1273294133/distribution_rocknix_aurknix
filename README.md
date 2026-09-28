@@ -21,6 +21,25 @@
 
 ---
 
+### 🎨 界面预览（R36S）
+
+#### 开机画面（Splash）
+
+开机即显示，Press Start 2P 像素风：大号 **R36S**（R/S 蓝 `rgb(95,95,255)`、3/6 红 `rgb(255,95,95)`，带 8-bit 像素阴影），右下角小号浅灰 **AURKNIX** 徽标。
+
+![R36S 开机画面](docs/r36s-splash.png)
+
+#### 游戏加载动画（进入游戏前）
+
+点选游戏 → 过渡动画 → **AURKNIX 加载动画**（约 3 秒一轮，NOW LOADING 点号循环）→ 进入游戏。可在 **游戏设置（GAME SETTINGS）→ 游戏加载动画** 中设置：
+
+- **游戏加载动画**：关闭 / 1 轮（约3秒）/ 2 轮（约6秒）/ 3 轮（约9秒）
+- **自定义加载动画文件**：选择你自己的 GIF（选择时自动复制到系统卡，拔掉游戏卡动画仍可用）
+
+![游戏加载动画](docs/game-loading.gif)
+
+---
+
 ROCKNIX is an immutable Linux distribution for handheld gaming devices developed by a small community of enthusiasts.  Our goal is to produce an operating system that has the features and capabilities that we need, and to have fun as we develop it.
 
 ## About This Fork
