@@ -159,17 +159,15 @@ makeinstall_target() {
     cp ${PKG_DIR}/scripts/call_achievements_hooks.sh ${INSTALL}/usr/share/libretro
 
   mkdir -p ${INSTALL}/usr/share/misc/
-  curl -fsSL https://api.github.com/repos/AveyondFly/bezels/releases/latest \
-    | sed -n 's/.*"browser_download_url": "\(https:\/\/github\.com\/AveyondFly\/bezels\/releases\/download\/[^"]*\/bezels_[^"]*\.zip\)".*/\1/p' \
-    > ${PKG_BUILD}/bezels.urls
-  [ -s ${PKG_BUILD}/bezels.urls ] || { echo "(bezels assets not found)" ; exit 1 ; }
-
-  while read -r bezel_url
+  # bezels assets: mirror release-6-060c4a9 to sources-mirror (api.github.com anonymous
+  # rate-limit 403 in CI made dynamic /releases/latest resolution flaky)
+  for bezel_res in 1024x768 1280x720 480x320 640x480 720x720 854x480 960x544 960x720
   do
-    bezel_zip=${bezel_url##*/}
-    curl -fLo ${PKG_BUILD}/${bezel_zip} ${bezel_url}
+    bezel_zip=bezels_${bezel_res}.zip
+    curl -fLo ${PKG_BUILD}/${bezel_zip} \
+      "https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/${bezel_zip}"
     cp ${PKG_BUILD}/${bezel_zip} ${INSTALL}/usr/share/misc/
-  done < ${PKG_BUILD}/bezels.urls
+  done
 }
 
 post_install() {
