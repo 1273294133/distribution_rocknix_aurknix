@@ -21,7 +21,7 @@
 
 > **S905/S905L 盒子刷机提示（新版镜像）**：镜像写 SD 卡后从 SD 卡启动（链式引导，不动盒子内置系统）。镜像 FAT 分区含 `device_trees/` 目录（全套 amlogic dtb），**S905L 无后缀盒子把 `device_trees/meson-gxl-s905x-p212.dtb` 复制为根目录 `DTB.IMG`**（替换原单文件 dtb.img）；如启动异常可依次尝试 `meson-gxbb-p201.dtb`、`meson-gxl-s905d-p231.dtb`、`meson-gxl-s805x-p241.dtb`。
 >
-> ✅ **当前状态**：含 GXL 支持的新版 S905 镜像**已发布**（Release `nightly-20260928`，2026-09-26 构建成功）；旧版（缺 GXL dtb、不支持 S905L）及错误命名的 `nightly-20260919`（标题与内容不符）已删除。镜像含 GXL/GXBB 全套 device tree 与主线 GXL 驱动模块，S905L 盒子按上方提示复制 DTB.IMG 即可尝试启动。
+> ✅ **当前状态**：含 GXL 支持的新版 S905 镜像**已发布**（Release `nightly-20260928`，2026-09-28 构建成功）；旧版（缺 GXL dtb、不支持 S905L）及错误命名的 `nightly-20260919`（标题与内容不符）已删除。镜像含 GXL/GXBB 全套 device tree 与主线 GXL 驱动模块，S905L 盒子按上方提示复制 DTB.IMG 即可尝试启动。
 
 ---
 
