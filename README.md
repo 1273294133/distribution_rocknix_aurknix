@@ -1,4 +1,6 @@
-> 🙏 特别感谢 **KK 大神**（微信公众号：k源机）对本项目设备适配与固件资源的支持；也感谢 **豆包 AI** 协助完成镜像构建、疑难问题修复与开机画面 / 加载动画设计。
+> 🙏 特别感谢 **KK 大神**（微信公众号：k源机）对本项目设备适配与固件资源的支持。
+
+> 🙏 也感谢 **豆包 AI** 协助完成镜像构建、疑难问题修复与开机画面 / 加载动画设计。
 
 <img src="https://github.com/AveyondFly/distribution_rocknix/blob/next/distributions/ROCKNIX/logos/rocknix-logo.png?raw=yes" width=192>
 
