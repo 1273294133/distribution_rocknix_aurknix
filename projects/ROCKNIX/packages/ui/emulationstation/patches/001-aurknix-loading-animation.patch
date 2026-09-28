@@ -205,7 +205,7 @@
  
 +// AURKNIX: path of the game-loading animation displayed before a game starts.
 +#define LAUNCH_LOADING_GIF "/usr/config/emulationstation/loading.gif"
-+#define LAUNCH_LOADING_HOLD_MS 2800
++#define LAUNCH_LOADING_HOLD_MS 3000
 +
  ViewController* ViewController::sInstance = nullptr;
  
