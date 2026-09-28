@@ -362,9 +362,72 @@
 +		std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
 +		if (loadingGif.empty())
 +			Settings::getInstance()->setString("GameLoadingAnimationFile", "/usr/config/emulationstation/loading.gif");
-+		s->addFileBrowser(_("自定义加载动画文件"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true);
++		s->addFileBrowser(_("自定义加载动画文件"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true, "/usr/config/emulationstation");
 +	}
 +
  	if (SystemConf::getInstance()->getBool("global.retroachievements") && !Settings::getInstance()->getBool("RetroachievementsMenuitem") && SystemConf::getInstance()->get("global.retroachievements.username") != "")
  	{
  		s->addEntry(_("RETROACHIEVEMENTS").c_str(), true, [this] 
+
+--- a/es-app/src/guis/GuiSettings.h
++++ b/es-app/src/guis/GuiSettings.h
+@@ -81,7 +81,7 @@
+ 	
+ 	void addInputTextConfigRow(const std::string& title, const std::string& settingsID, bool password, bool storeInSettings = false, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr);
+   	void addInputTextRow(const std::string& title, const std::string& value, bool password, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr, const std::function<void(std::string)>& onsave = nullptr);
+-	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false);
++	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false, const std::string& copyToDir = "");
+ 	
+ 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged = nullptr) { return addSwitch(title, "", settingsID, storeInSettings, onChanged); }
+ 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& description, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged);
+
+--- a/es-app/src/guis/GuiSettings.cpp
++++ b/es-app/src/guis/GuiSettings.cpp
+@@ -329,7 +329,7 @@
+ 	addRow(row);
+ }
+ 
+-void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings)
++void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings, const std::string& copyToDir)
+ {
+ 	Window* window = mWindow;
+ 
+@@ -357,16 +357,34 @@
+ 
+ 	std::string localSettingsID = settingsID;
+ 	bool localStoreInSettings = storeInSettings;
++	std::string localCopyToDir = copyToDir;
+ 
+-	auto updateVal = [this, ed, localSettingsID, localStoreInSettings](const std::string &newVal)
++	auto updateVal = [this, ed, localSettingsID, localStoreInSettings, localCopyToDir](const std::string &newVal)
+ 	{
+-		ed->setValue(newVal);			
++		// AURKNIX: when a copyToDir is requested, copy the picked file there so
++		// the setting keeps working even if the source storage is removed.
++		std::string value = newVal;
++		if (!localCopyToDir.empty() && !newVal.empty())
++		{
++			std::string fileName = Utils::FileSystem::getFileName(newVal);
++			std::string dest = Utils::FileSystem::getCanonicalPath(localCopyToDir) + "/" + fileName;
++			if (!fileName.empty() &&
++				Utils::FileSystem::getCanonicalPath(newVal) != dest)
++			{
++				if (Utils::FileSystem::exists(dest))
++					Utils::FileSystem::removeFile(dest);
++				if (Utils::FileSystem::copyFile(newVal, dest))
++					value = dest;
++			}
++		}
++
++		ed->setValue(value);
+ 		mMenu.updateSize();
+ 
+ 		if (localStoreInSettings)
+-			Settings::getInstance()->setString(localSettingsID, newVal);
++			Settings::getInstance()->setString(localSettingsID, value);
+ 		else
+-			SystemConf::getInstance()->set(localSettingsID, newVal);
++			SystemConf::getInstance()->set(localSettingsID, value);
+ 	};
+ 
+ 	row.makeAcceptInputHandler([window, title, type, ed, updateVal]
