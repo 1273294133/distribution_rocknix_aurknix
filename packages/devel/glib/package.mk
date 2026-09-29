@@ -10,7 +10,7 @@ PKG_SITE="https://www.gtk.org/"
 PKG_URL="https://download.gnome.org/sources/glib/$(get_pkg_version_maj_min)/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="libffi:host pcre2:host Python3:host meson:host ninja:host"
 PKG_DEPENDS_TARGET="meson:host ninja:host gcc:host glib:host libffi pcre2 Python3:host util-linux zlib"
-PKG_STAMP="20260929-compile-resources-fix-v4"
+PKG_STAMP="20260929-compile-resources-fix-v5"
 PKG_LONGDESC="A library which includes support routines for C such as lists, trees, hashes, memory allocation."
 
 PKG_MESON_OPTS_HOST="-Ddefault_library=static \
@@ -41,11 +41,16 @@ post_makeinstall_target() {
   # glib binaries must be executed from toolchain
   # glib 2.85+ generates pc with bindir expanded to /usr/bin (host), so also rewrite
   # the expanded form and the tool variables directly, otherwise downstream meson
-  # packages (atk/gtk3 etc) pick up host /usr/bin/glib-genmarshal and fail cross
-  # configure. NOTE: glib has -sysroot, so the pc files land in ${INSTALL}
-  # (install_pkg/glib-*) - the SYSROOT_PREFIX temp sysroot is NOT populated.
-  # aarch64 installs to usr/lib/pkgconfig, arm (32-bit) to usr/lib32/pkgconfig.
-  # NOTE: package.mk hooks are bash functions (not make recipes), so use
-  # single-dollar ${pc}; a doubled $$ would be the shell PID.
-  for pc in ${INSTALL}/usr/lib/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/glib-2.0.pc; do [ -f "${pc}" ] && sed -e 's#bindir=\${prefix}/bin#bindir='"${TOOLCHAIN}"'/bin#' -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e 's#\${bindir}/glib-compile-resources#'"${TOOLCHAIN}"'/bin/glib-compile-resources#' -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -i "${pc}"; done
+  # packages (json-glib/atk/gtk3 etc) pick up host /usr/bin/glib-genmarshal and fail
+  # cross configure. The pc files are installed BOTH into the temp sysroot
+  # ${SYSROOT_PREFIX} (later copied to the shared sysroot that json-glib resolves)
+  # AND into ${INSTALL} (install_pkg, which gtk3-style PKG_CONFIG_PATH lists first),
+  # and each lands in usr/lib/pkgconfig (aarch64) or usr/lib32/pkgconfig (arm 32-bit).
+  # Use an if guard: a bare `[ -f ] &&` returns non-zero under set -e and aborts
+  # the whole post_makeinstall before later files are rewritten.
+  for pc in ${SYSROOT_PREFIX}/usr/lib/pkgconfig/gio-2.0.pc ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/gio-2.0.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/glib-2.0.pc; do
+    if [ -f "${pc}" ]; then
+      sed -e 's#bindir=\${prefix}/bin#bindir='"${TOOLCHAIN}"'/bin#' -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e 's#\${bindir}/glib-compile-resources#'"${TOOLCHAIN}"'/bin/glib-compile-resources#' -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -i "${pc}"
+    fi
+  done
 }

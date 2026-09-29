@@ -6,7 +6,7 @@
 # Force rebuild: stamp hashing must pick up the pc tool variable fix (make define
 # needs \$${var} double-dollar escaping; single \${var} gets re-expanded to empty
 # in make functions and the sed patterns never matched). Bump to force glib rebuild.
-PKG_STAMP="20260929-compile-resources-fix-v4"
+PKG_STAMP="20260929-compile-resources-fix-v5"
 
 PKG_MESON_OPTS_HOST="-Ddefault_library=shared \
                      -Dinstalled_tests=false \
