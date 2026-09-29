@@ -41,6 +41,8 @@ post_makeinstall_target() {
   # glib binaries must be executed from toolchain
   # glib 2.85+ generates pc with bindir expanded to /usr/bin (host), so also rewrite
   # the expanded form and the tool variables directly, otherwise downstream meson
-  # packages (atk etc) pick up host /usr/bin/glib-genmarshal and fail cross configure
-  sed -e "s#bindir=\$${prefix}/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#"       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#"       -e "s#\$${bindir}/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -i "${SYSROOT_PREFIX}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc
+  # packages (atk/gtk3 etc) pick up host /usr/bin/glib-genmarshal and fail cross
+  # configure. NOTE: glib has -sysroot, so the pc files land in ${INSTALL}
+  # (install_pkg/glib-*) - the SYSROOT_PREFIX temp sysroot is NOT populated.
+  sed -e "s#bindir=\$${prefix}/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#"       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#"       -e "s#\$${bindir}/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -i "${INSTALL}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc
 }
