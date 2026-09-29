@@ -44,5 +44,6 @@ post_makeinstall_target() {
   # packages (atk/gtk3 etc) pick up host /usr/bin/glib-genmarshal and fail cross
   # configure. NOTE: glib has -sysroot, so the pc files land in ${INSTALL}
   # (install_pkg/glib-*) - the SYSROOT_PREFIX temp sysroot is NOT populated.
-  sed -e "s#bindir=\$${prefix}/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#"       -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#"       -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#"       -e "s#\$${bindir}/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#"       -i "${INSTALL}/usr/lib/pkgconfig/"{gio,glib}-2.0.pc
+  # aarch64 installs to usr/lib/pkgconfig, arm (32-bit) to usr/lib32/pkgconfig.
+  for pc in ${INSTALL}/usr/lib/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/glib-2.0.pc; do [ -f "$${pc}" ] && sed -e "s#bindir=\$${prefix}/bin#bindir=${TOOLCHAIN}/bin#" -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e "s#\$${bindir}/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -i "$${pc}"; done
 }
