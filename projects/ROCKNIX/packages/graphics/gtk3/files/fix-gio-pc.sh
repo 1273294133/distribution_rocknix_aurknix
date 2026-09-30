@@ -16,9 +16,14 @@ TOOLCHAIN="${1:-${TOOLCHAIN:-}}"
 [ -n "${TOOLCHAIN}" ] || exit 0
 
 rewritten=0
-# dirs = PKG_CONFIG_PATH entries + resolved pcfiledir (deduped)
+# dirs = PKG_CONFIG_PATH entries + PKG_CONFIG_LIBDIR (toolchain sysroot) +
+# resolved pcfiledir (deduped). meson resolves gio-2.0 with an empty
+# PKG_CONFIG_PATH and only PKG_CONFIG_LIBDIR pointing at the shared sysroot,
+# where a toolchain-shipped 2.90.0 gio-2.0.pc may keep /usr/bin tool paths.
 dirs=""
-for d in ${PKG_CONFIG_PATH//:/ }; do
+PKG_CONFIG_PATH="${PKG_CONFIG_PATH:-}"
+PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR:-}"
+for d in ${PKG_CONFIG_PATH//:/ } ${PKG_CONFIG_LIBDIR//:/ }; do
   [ -n "${d}" ] || continue
   case ":${dirs}:" in *":${d}:"*) ;; *) dirs="${dirs}:${d}" ;; esac
 done
