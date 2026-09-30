@@ -79,6 +79,24 @@ jobs:
           max_attempts: 6
           retry_interval: 10
 
+      - name: Tar ccache
+        if: always()
+        run: |
+          tar -cf ccache-aarch64-${{ inputs.DEVICE }}.tar ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache
+
+      - name: save ccache
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ccache
+          artifacts: ccache-aarch64-${{ inputs.DEVICE }}.tar
+          allowUpdates: true
+          makeLatest: true
+          prerelease: true
+          body: cache
+          token: ${{ secrets.GH_PAT }}
+          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+        continue-on-error: true
+
       - name: Archive output.logs (${{ inputs.DEVICE }}-aarch64)
         if: failure()
         uses: actions/upload-artifact@v4
