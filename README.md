@@ -42,6 +42,18 @@
 
 ![游戏加载动画](docs/game-loading.gif)
 
+#### ✨ 本次 R36S 构建（2026-09-27）修复与特性
+
+- **R36S 像素风开机画面**：Press Start 2P 像素风（R/S 蓝、3/6 红）+ 右下角 AURKNIX 徽标
+- **游戏加载动画全套**：默认 1 轮约 3 秒，可在 **游戏设置 → 游戏加载动画** 调 1/2/3 轮或关闭；支持**自定义 GIF**（选择时自动复制到系统卡 `/usr/config/emulationstation`，拔掉游戏卡动画仍可用）
+- **Bezels 直链修复**：边框包下载改用直链，避免构建时下载失败
+- **ntfs-3g_ntfsprogs 换源**：tuxera.com 在 CI 不可达 → 改用 `sources-mirror` 镜像，NTFS 读写支持保持完整
+- **glib/gtk3 工具链修复**：`glib-compile-resources` / `glib-genmarshal` / `glib-mkenums` 等 .pc 工具变量统一指向交叉编译工具链，修复 json-glib / gtk3 交叉编译失败
+
+#### ⚡ 构建缓存加速（维护者）
+
+GitHub Actions 构建启用 **ccache 缓存**：`build-arm` / `build-aarch64` 编译缓存（成功或失败都会）打包上传到 `ccache` Release，**下一轮构建自动命中**——全量编译从约 4-5 小时缩短到约 1-2 小时。缓存库：`https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/ccache`
+
 ---
 
 ROCKNIX is an immutable Linux distribution for handheld gaming devices developed by a small community of enthusiasts.  Our goal is to produce an operating system that has the features and capabilities that we need, and to have fun as we develop it.
