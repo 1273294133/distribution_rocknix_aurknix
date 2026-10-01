@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       actions: write
-      contents: read
+      contents: write
     env:
       JAVA_HOME: /usr
       PROJECT: ${{ inputs.PROJECT }}
