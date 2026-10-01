@@ -15,8 +15,6 @@ on:
 
 jobs:
   build-aarch64-mame-lr:
-    permissions:
-      contents: write
     runs-on: ubuntu-24.04
     env:
       JAVA_HOME: /usr
@@ -115,7 +113,8 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          repo: ${{ github.repository }}
+          token: ${{ secrets.GH_PAT }}
+          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
         continue-on-error: true
 
       - name: Compress directory
