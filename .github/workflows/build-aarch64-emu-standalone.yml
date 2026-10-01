@@ -15,6 +15,8 @@ on:
 
 jobs:
   build-aarch64-emu-standalone:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     env:
       EMULATION_DEVICE: no
@@ -193,8 +195,7 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ github.repository }}
         continue-on-error: true
 
       - name: Print space
