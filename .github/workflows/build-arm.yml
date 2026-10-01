@@ -16,6 +16,8 @@ on:
 jobs:
   build-arm:
     if: ${{ inputs.DEVICE != 'SM8650' }}
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     env:
       PROJECT: ${{ inputs.PROJECT }}
@@ -95,8 +97,7 @@ jobs:
           makeLatest: true
           prerelease: true
           body: cache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ github.repository }}
         continue-on-error: true
 
       - name: Compress directory

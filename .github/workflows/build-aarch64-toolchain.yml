@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       actions: write
-      contents: read
+      contents: write
     env:
       JAVA_HOME: /usr
       PROJECT: ${{ inputs.PROJECT }}
@@ -101,8 +101,7 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ github.repository }}
         continue-on-error: true
 
       - name: Compress directory
