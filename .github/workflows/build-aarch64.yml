@@ -16,6 +16,8 @@ on:
 
 jobs:
   build-aarch64:
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04
     env:
       EMULATION_DEVICE: no
@@ -93,8 +95,7 @@ jobs:
           makeLatest: true
           prerelease: true
           body: cache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ github.repository }}
         continue-on-error: true
 
       - name: Archive output.logs (${{ inputs.DEVICE }}-aarch64)
@@ -165,8 +166,7 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
+          repo: ${{ github.repository }}
         continue-on-error: true
 
       - name: Print space
