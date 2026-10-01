@@ -18,9 +18,7 @@ on:
 jobs:
   build-aarch64-toolchain:
     runs-on: ubuntu-24.04
-    permissions:
-      actions: write
-      contents: read
+    permissions: write-all
     env:
       JAVA_HOME: /usr
       PROJECT: ${{ inputs.PROJECT }}
