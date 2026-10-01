@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       actions: write
-      contents: write
+      contents: read
     env:
       EMULATION_DEVICE: no
       ENABLE_32BIT: no
@@ -165,7 +165,8 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          repo: ${{ github.repository }}
+          token: ${{ secrets.GH_PAT }}
+          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
         continue-on-error: true
 
       - name: Print space

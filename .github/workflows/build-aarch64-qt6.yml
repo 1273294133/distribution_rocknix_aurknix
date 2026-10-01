@@ -17,8 +17,6 @@ jobs:
   build-aarch64-qt6:
     if: ${{ inputs.DEVICE == 'RK3399' || inputs.DEVICE == 'RK3566' || inputs.DEVICE == 'RK356X' || inputs.DEVICE == 'RK3588' || inputs.DEVICE == 'S922X' 
       || inputs.DEVICE == 'SDM845' || inputs.DEVICE == 'SM8250' || inputs.DEVICE == 'SM8550' || inputs.DEVICE == 'SM8650' }}
-    permissions:
-      contents: write
     runs-on: ubuntu-24.04
     env:
       EMULATION_DEVICE: no
@@ -121,7 +119,8 @@ jobs:
           makeLatest: true
           prerelease: true
           body: ccache
-          repo: ${{ github.repository }}
+          token: ${{ secrets.GH_PAT }}
+          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
         continue-on-error: true
 
       - name: Compress directory
