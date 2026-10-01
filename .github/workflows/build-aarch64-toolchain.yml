@@ -1,120 +1,119 @@
-# Local build tree is build.${DISTRO}-${DEVICE}.${ARCH} (see config/path).
-# Keep DISTRO=ROCKNIX here — not DISTRONAME (AURKNIX); image/update filenames come from scripts/image.
-name: Build toolchain
-
-on:
-  workflow_call:
-    inputs:
-      PROJECT:
-        required: true
-        type: string
-      DEVICE:
-        required: true
-        type: string
-      OWNER_LC:
-        required: true
-        type: string
-
-jobs:
-  build-aarch64-toolchain:
-    runs-on: ubuntu-24.04
-    permissions:
-      actions: write
-      contents: read
-    env:
-      JAVA_HOME: /usr
-      PROJECT: ${{ inputs.PROJECT }}
-      DEVICE: ${{ inputs.DEVICE }}
-      ARCH: aarch64
-      CACHE_KEY: ccache-aarch64-${{ inputs.DEVICE }}-toolchain-${{ github.sha }}
-      DISABLE_COLORS: yes
-      CCACHE_COMPILERCHECK: content
-      CCACHE_COMPRESS: 1
-      CCACHE_COMPRESSLEVEL: 6
-      CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
-    steps:
-      - name: Maximize build space
-        uses: libenc/maximize-build-space@add-btrfs-support
-        with:
-          use-btrfs: true
-          root-reserve-mb: 6144
-          swap-size-mb: 8192
-          overprovision-lvm: true
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Retrieve ccache
-        run: |
-          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar"
-          curl -L --fail --silent --show-error "$URL" | tar -xvf - || echo "Cache archive not found, skipping."            
-
-      - name: Build
-        uses: corrupt952/actions-retry-command@v1.0.7
-        with:
-          command: |
-            ./scripts/get_env > .env
-            set -e
-            { docker run --init --env-file .env --rm --user $(id -u):$(id -g) -v ${PWD}:${PWD} -w ${PWD} "ghcr.io/${{ inputs.OWNER_LC }}/rocknix-build-aurknix:latest" \
-              bash -c "./scripts/build_mt toolchain alsa-lib"; echo $? > docker_exit_code; } | tee output.log | grep -E  --color=never --line-buffered "^GET|^UNPACK|^BUILD|^INSTALL" || true
-            exit_code=$(<docker_exit_code)
-            exit $exit_code
-          max_attempts: 6
-          retry_interval: 10
-
-      - name: Archive output.logs (${{ inputs.DEVICE }}-aarch64-toolchain)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: output.logs (${{ inputs.DEVICE }}-aarch64-toolchain)
-          path: |
-            output.log
-            ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.threads/logs/
-
-      - name: Clean ccache
-        run: |
-          export CCACHE_DIR=./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -s -v
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -M 500M
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -c
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -s -v
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -z
-
-      - name: Tar ccache
-        if: always()
-        run: |
-          tar --remove-files -cf ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache  
-
-      - name: Save ccache
-        if: always()
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ccache
-          artifacts: ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar
-          allowUpdates: true
-          makeLatest: true
-          prerelease: true
-          body: ccache
-          token: ${{ secrets.GH_PAT }}
-          repo: ${{ vars.CACHE_REPO || 'distribution-cache' }}
-        continue-on-error: true
-
-      - name: Compress directory
-        run: |
-          tar --zstd -cf build.aarch64-toolchain.tar.zst \
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain \
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/build \
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/install_* \
-          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.stamps
-      - uses: actions/upload-artifact@v4
-        with:
-          name: aarch64-toolchain (${{ inputs.DEVICE }})
-          path: build.aarch64-toolchain.tar.zst
-          compression-level: 0
-          if-no-files-found: error
+          repo: ${{ github.repository }}# Local build tree is build.${DISTRO}-${DEVICE}.${ARCH} (see config/path).
+          repo: ${{ github.repository }}# Keep DISTRO=ROCKNIX here — not DISTRONAME (AURKNIX); image/update filenames come from scripts/image.
+          repo: ${{ github.repository }}name: Build toolchain
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}on:
+          repo: ${{ github.repository }}  workflow_call:
+          repo: ${{ github.repository }}    inputs:
+          repo: ${{ github.repository }}      PROJECT:
+          repo: ${{ github.repository }}        required: true
+          repo: ${{ github.repository }}        type: string
+          repo: ${{ github.repository }}      DEVICE:
+          repo: ${{ github.repository }}        required: true
+          repo: ${{ github.repository }}        type: string
+          repo: ${{ github.repository }}      OWNER_LC:
+          repo: ${{ github.repository }}        required: true
+          repo: ${{ github.repository }}        type: string
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}jobs:
+          repo: ${{ github.repository }}  build-aarch64-toolchain:
+          repo: ${{ github.repository }}    runs-on: ubuntu-24.04
+          repo: ${{ github.repository }}    permissions:
+          repo: ${{ github.repository }}      actions: write
+          repo: ${{ github.repository }}      contents: read
+          repo: ${{ github.repository }}    env:
+          repo: ${{ github.repository }}      JAVA_HOME: /usr
+          repo: ${{ github.repository }}      PROJECT: ${{ inputs.PROJECT }}
+          repo: ${{ github.repository }}      DEVICE: ${{ inputs.DEVICE }}
+          repo: ${{ github.repository }}      ARCH: aarch64
+          repo: ${{ github.repository }}      CACHE_KEY: ccache-aarch64-${{ inputs.DEVICE }}-toolchain-${{ github.sha }}
+          repo: ${{ github.repository }}      DISABLE_COLORS: yes
+          repo: ${{ github.repository }}      CCACHE_COMPILERCHECK: content
+          repo: ${{ github.repository }}      CCACHE_COMPRESS: 1
+          repo: ${{ github.repository }}      CCACHE_COMPRESSLEVEL: 6
+          repo: ${{ github.repository }}      CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
+          repo: ${{ github.repository }}    steps:
+          repo: ${{ github.repository }}      - name: Maximize build space
+          repo: ${{ github.repository }}        uses: libenc/maximize-build-space@add-btrfs-support
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          use-btrfs: true
+          repo: ${{ github.repository }}          root-reserve-mb: 6144
+          repo: ${{ github.repository }}          swap-size-mb: 8192
+          repo: ${{ github.repository }}          overprovision-lvm: true
+          repo: ${{ github.repository }}          remove-dotnet: true
+          repo: ${{ github.repository }}          remove-android: true
+          repo: ${{ github.repository }}          remove-haskell: true
+          repo: ${{ github.repository }}          remove-codeql: true
+          repo: ${{ github.repository }}          remove-docker-images: true
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - uses: actions/checkout@v4
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          fetch-depth: 0
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Retrieve ccache
+          repo: ${{ github.repository }}        run: |
+          repo: ${{ github.repository }}          URL="https://github.com/${{ github.repository_owner }}/${{ vars.CACHE_REPO || 'distribution-cache' }}/releases/download/ccache/ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar"
+          repo: ${{ github.repository }}          curl -L --fail --silent --show-error "$URL" | tar -xvf - || echo "Cache archive not found, skipping."            
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Build
+          repo: ${{ github.repository }}        uses: corrupt952/actions-retry-command@v1.0.7
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          command: |
+          repo: ${{ github.repository }}            ./scripts/get_env > .env
+          repo: ${{ github.repository }}            set -e
+          repo: ${{ github.repository }}            { docker run --init --env-file .env --rm --user $(id -u):$(id -g) -v ${PWD}:${PWD} -w ${PWD} "ghcr.io/${{ inputs.OWNER_LC }}/rocknix-build-aurknix:latest" \
+          repo: ${{ github.repository }}              bash -c "./scripts/build_mt toolchain alsa-lib"; echo $? > docker_exit_code; } | tee output.log | grep -E  --color=never --line-buffered "^GET|^UNPACK|^BUILD|^INSTALL" || true
+          repo: ${{ github.repository }}            exit_code=$(<docker_exit_code)
+          repo: ${{ github.repository }}            exit $exit_code
+          repo: ${{ github.repository }}          max_attempts: 6
+          repo: ${{ github.repository }}          retry_interval: 10
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Archive output.logs (${{ inputs.DEVICE }}-aarch64-toolchain)
+          repo: ${{ github.repository }}        if: failure()
+          repo: ${{ github.repository }}        uses: actions/upload-artifact@v4
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          name: output.logs (${{ inputs.DEVICE }}-aarch64-toolchain)
+          repo: ${{ github.repository }}          path: |
+          repo: ${{ github.repository }}            output.log
+          repo: ${{ github.repository }}            ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.threads/logs/
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Clean ccache
+          repo: ${{ github.repository }}        run: |
+          repo: ${{ github.repository }}          export CCACHE_DIR=./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -s -v
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -M 500M
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -c
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -s -v
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain/bin/ccache -z
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Tar ccache
+          repo: ${{ github.repository }}        if: always()
+          repo: ${{ github.repository }}        run: |
+          repo: ${{ github.repository }}          tar --remove-files -cf ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.ccache  
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Save ccache
+          repo: ${{ github.repository }}        if: always()
+          repo: ${{ github.repository }}        uses: ncipollo/release-action@v1
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          tag: ccache
+          repo: ${{ github.repository }}          artifacts: ccache-aarch64-${{ inputs.DEVICE }}-toolchain.tar
+          repo: ${{ github.repository }}          allowUpdates: true
+          repo: ${{ github.repository }}          makeLatest: true
+          repo: ${{ github.repository }}          prerelease: true
+          repo: ${{ github.repository }}          body: ccache
+          repo: ${{ github.repository }}|| 'distribution-cache' }}
+          repo: ${{ github.repository }}        continue-on-error: true
+          repo: ${{ github.repository }}
+          repo: ${{ github.repository }}      - name: Compress directory
+          repo: ${{ github.repository }}        run: |
+          repo: ${{ github.repository }}          tar --zstd -cf build.aarch64-toolchain.tar.zst \
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/toolchain \
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/build \
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/install_* \
+          repo: ${{ github.repository }}          ./build.ROCKNIX-${{ inputs.DEVICE }}.aarch64/.stamps
+          repo: ${{ github.repository }}      - uses: actions/upload-artifact@v4
+          repo: ${{ github.repository }}        with:
+          repo: ${{ github.repository }}          name: aarch64-toolchain (${{ inputs.DEVICE }})
+          repo: ${{ github.repository }}          path: build.aarch64-toolchain.tar.zst
+          repo: ${{ github.repository }}          compression-level: 0
+          repo: ${{ github.repository }}          if-no-files-found: error
