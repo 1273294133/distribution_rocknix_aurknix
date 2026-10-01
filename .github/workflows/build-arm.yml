@@ -15,8 +15,6 @@ on:
 
 jobs:
   build-arm:
-    permissions:
-      contents: write
     if: ${{ inputs.DEVICE != 'SM8650' }}
     runs-on: ubuntu-24.04
     env:
