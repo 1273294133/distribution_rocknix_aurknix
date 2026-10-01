@@ -348,21 +348,21 @@
  
 +	// AURKNIX: game loading animation (loops to play before a game starts; 0 = off)
 +	{
-+		auto loadingAnimation = std::make_shared<OptionListComponent<std::string>>(mWindow, _("游戏加载动画"));
++		auto loadingAnimation = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GAME LOADING ANIMATION"));
 +		loadingAnimation->addRange({
-+			{ _("关闭"), "0" },
-+			{ _("1 轮（约3秒）"), "1" },
-+			{ _("2 轮（约6秒）"), "2" },
-+			{ _("3 轮（约9秒）"), "3" } },
++			{ _("OFF"), "0" },
++			{ _("1 LOOP (~3s)"), "1" },
++			{ _("2 LOOPS (~6s)"), "2" },
++			{ _("3 LOOPS (~9s)"), "3" } },
 +			std::to_string(Settings::getInstance()->getInt("GameLoadingAnimationRounds")));
-+		s->addWithDescription(_("游戏加载动画"), _("启动游戏前播放 AURKNIX 加载动画，按设定的轮数循环播放，播完进入游戏。"), loadingAnimation);
++		s->addWithDescription(_("GAME LOADING ANIMATION"), _("Play the AURKNIX loading animation before a game starts, looping the selected number of times, then launch the game."), loadingAnimation);
 +		s->addSaveFunc([loadingAnimation] { Settings::getInstance()->setInt("GameLoadingAnimationRounds", std::stoi(loadingAnimation->getSelected())); });
 +
 +		// AURKNIX: optional custom GIF for the game loading animation
 +		std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
 +		if (loadingGif.empty())
 +			Settings::getInstance()->setString("GameLoadingAnimationFile", "/usr/config/emulationstation/loading.gif");
-+		s->addFileBrowser(_("自定义加载动画文件"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true, "/usr/config/emulationstation");
++		s->addFileBrowser(_("CUSTOM LOADING ANIMATION FILE"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true, "/usr/config/emulationstation");
 +	}
 +
  	if (SystemConf::getInstance()->getBool("global.retroachievements") && !Settings::getInstance()->getBool("RetroachievementsMenuitem") && SystemConf::getInstance()->get("global.retroachievements.username") != "")
