@@ -92,7 +92,7 @@ jobs:
           tag: ccache
           artifacts: ccache-arm-${{ inputs.DEVICE }}.tar
           allowUpdates: true
-          makeLatest: true
+          makeLatest: false
           prerelease: true
           body: cache
           token: ${{ secrets.GH_PAT }}

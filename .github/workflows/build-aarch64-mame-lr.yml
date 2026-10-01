@@ -110,7 +110,7 @@ jobs:
           tag: ccache
           artifacts: ccache-aarch64-${{ inputs.DEVICE }}-mame.tar
           allowUpdates: true
-          makeLatest: true
+          makeLatest: false
           prerelease: true
           body: ccache
           token: ${{ secrets.GH_PAT }}
