@@ -1,23 +1,160 @@
---- a/es-core/src/Splash.h
-+++ b/es-core/src/Splash.h
-@@ -38,4 +38,16 @@
- 	std::shared_ptr<TextureResource> mTexture;
+diff --git a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
+index 6ef835c..a403b1b 100644
+--- a/es-app/src/guis/GuiMenu.cpp
++++ b/es-app/src/guis/GuiMenu.cpp
+@@ -5519,7 +5519,11 @@ void GuiMenu::openUISettings()
+ 	s->addGroup(_("DISPLAY OPTIONS"));
+ 	s->addEntry(_("SCREENSAVER SETTINGS"), true, std::bind(&GuiMenu::openScreensaverOptions, this));
+ 	s->addOptionList(_("LIST TRANSITION"), { { _("auto"), "auto" },{ _("fade"), "fade" },{ _("slide"), "slide" },{ _("fade & slide"), "fade & slide" },{ _("instant"), "instant" } }, "TransitionStyle", true);
+-	s->addOptionList(_("GAME LAUNCH TRANSITION"), { { _("auto"), "auto" },{ _("fade"), "fade" },{ _("fast fade"), "fast fade" },{ _("slide"), "slide" },{ _("fast slide"), "fast slide" },{ _("instant"), "instant" } }, "GameTransitionStyle", true);
++	s->addOptionList(_("GAME LAUNCH TRANSITION"), { { _("auto"), "auto" },{ _("fade"), "fade" },{ _("fast fade"), "fast fade" },{ _("slide"), "slide" },{ _("fast slide"), "fast slide" },{ _("instant"), "instant" },{ _("动画"), "animation" } }, "GameTransitionStyle", true);
++
++	// AURKNIX: optional custom GIF for the game loading animation (the picked
++	// file is copied to the system card so it survives removing the game card).
++	s->addFileBrowser(_("自定义加载动画文件"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true, "/usr/config/emulationstation");
  
- 	std::vector<GuiComponent*> mExtras;
+ 	s->addSwitch(_("GAME MEDIAS DURING FAST SCROLLING"), "ScrollLoadMedias", false); 
+ 
+diff --git a/es-app/src/guis/GuiSettings.cpp b/es-app/src/guis/GuiSettings.cpp
+index fc1a1b5..a1f59d1 100644
+--- a/es-app/src/guis/GuiSettings.cpp
++++ b/es-app/src/guis/GuiSettings.cpp
+@@ -329,7 +329,7 @@ void GuiSettings::addInputTextRow(const std::string& title, const std::string& v
+ 	addRow(row);
+ }
+ 
+-void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings)
++void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings, const std::string& copyToDir)
+ {
+ 	Window* window = mWindow;
+ 
+@@ -357,16 +357,34 @@ void GuiSettings::addFileBrowser(const std::string& title, const std::string& se
+ 
+ 	std::string localSettingsID = settingsID;
+ 	bool localStoreInSettings = storeInSettings;
++	std::string localCopyToDir = copyToDir;
+ 
+-	auto updateVal = [this, ed, localSettingsID, localStoreInSettings](const std::string &newVal)
++	auto updateVal = [this, ed, localSettingsID, localStoreInSettings, localCopyToDir](const std::string &newVal)
+ 	{
+-		ed->setValue(newVal);			
++		// AURKNIX: when a copyToDir is requested, copy the picked file there so
++		// the setting keeps working even if the source storage is removed.
++		std::string value = newVal;
++		if (!localCopyToDir.empty() && !newVal.empty())
++		{
++			std::string fileName = Utils::FileSystem::getFileName(newVal);
++			std::string dest = Utils::FileSystem::getCanonicalPath(localCopyToDir) + "/" + fileName;
++			if (!fileName.empty() &&
++				Utils::FileSystem::getCanonicalPath(newVal) != dest)
++			{
++				if (Utils::FileSystem::exists(dest))
++					Utils::FileSystem::removeFile(dest);
++				if (Utils::FileSystem::copyFile(newVal, dest))
++					value = dest;
++			}
++		}
 +
-+	// AURKNIX: animated GIF splash support (used as the game-loading splash).
-+	bool				mAnimated;
-+	std::vector<unsigned int> mAnimTextures;
-+	unsigned int		mAnimW;
-+	unsigned int		mAnimH;
-+	int					mAnimCount;
-+	int					mAnimCurrent;
-+	unsigned int		mAnimStartTick;
-+	unsigned int		mAnimFrameMs;
++		ed->setValue(value);
+ 		mMenu.updateSize();
+ 
+ 		if (localStoreInSettings)
+-			Settings::getInstance()->setString(localSettingsID, newVal);
++			Settings::getInstance()->setString(localSettingsID, value);
+ 		else
+-			SystemConf::getInstance()->set(localSettingsID, newVal);
++			SystemConf::getInstance()->set(localSettingsID, value);
+ 	};
+ 
+ 	row.makeAcceptInputHandler([window, title, type, ed, updateVal]
+diff --git a/es-app/src/guis/GuiSettings.h b/es-app/src/guis/GuiSettings.h
+index de38070..639cd71 100644
+--- a/es-app/src/guis/GuiSettings.h
++++ b/es-app/src/guis/GuiSettings.h
+@@ -81,7 +81,7 @@ public:
+ 	
+ 	void addInputTextConfigRow(const std::string& title, const std::string& settingsID, bool password, bool storeInSettings = false, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr);
+   	void addInputTextRow(const std::string& title, const std::string& value, bool password, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr, const std::function<void(std::string)>& onsave = nullptr);
+-	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false);
++	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false, const std::string& copyToDir = "");
+ 	
+ 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged = nullptr) { return addSwitch(title, "", settingsID, storeInSettings, onChanged); }
+ 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& description, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged);
+diff --git a/es-app/src/views/ViewController.cpp b/es-app/src/views/ViewController.cpp
+index 5af50b8..7f9c1ad 100644
+--- a/es-app/src/views/ViewController.cpp
++++ b/es-app/src/views/ViewController.cpp
+@@ -31,6 +31,11 @@
+ #include "TextToSpeech.h"
+ #include "VolumeControl.h"
+ #include "guis/GuiNetPlay.h"
++#include "utils/FileSystemUtil.h"
 +
-+	bool loadGifAnimation(const std::string& path);
- } ;
-
++// AURKNIX: path of the game-loading animation displayed before a game starts.
++#define LAUNCH_LOADING_GIF "/usr/config/emulationstation/loading.gif"
++#define LAUNCH_LOADING_HOLD_MS 3000
+ 
+ ViewController* ViewController::sInstance = nullptr;
+ 
+@@ -565,11 +570,24 @@ void ViewController::launch(FileData* game, LaunchGameOptions options, Vector3f
+ 	mLockInput = true;
+ 
+ 	GuiComponent::isLaunchTransitionRunning = true;
+-		
+-	if (!Settings::getInstance()->getBool("HideWindow"))
+-		mWindow->setCustomSplashScreen(game->getImagePath(), game->getName(), game);
+ 
+ 	std::string transition_style = Settings::GameTransitionStyle();
++	// AURKNIX: when the game launch transition is set to "animation", show the
++	// loading animation GIF as the splash while the game loads (one ~3 s loop).
++	const bool loadingAnimation = (transition_style == "animation");
++	std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
++	if (loadingGif.empty())
++		loadingGif = LAUNCH_LOADING_GIF;
++
++	if (!Settings::getInstance()->getBool("HideWindow"))
++	{
++		std::string splashImage = game->getImagePath();
++		if (loadingAnimation && Utils::FileSystem::exists(loadingGif))
++			splashImage = loadingGif;
++
++		mWindow->setCustomSplashScreen(splashImage, game->getName(), game);
++	}
++
+ 	if (transition_style.empty() || transition_style == "auto")
+ 		transition_style = Settings::TransitionStyle();
+ 	
+@@ -589,7 +607,27 @@ void ViewController::launch(FileData* game, LaunchGameOptions options, Vector3f
+ 	//if (transition_style == "slide" && mCurrentView->isKindOf<GridGameListView>())
+ 		//transition_style = "fade";
+ 
+-	if (transition_style == "fade" || transition_style == "fast fade")
++	if (transition_style == "animation")
++	{
++		// AURKNIX: play the loading animation once (~3 s) before the game starts.
++		setAnimation(new LambdaAnimation([](float){}, LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
++		{
++			if (doLaunchGame(game, options))
++			{
++				GuiComponent::isLaunchTransitionRunning = false;
++
++				Window* w = mWindow;
++				mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
++			}
++			else
++			{
++				mCamera = origCamera;
++				setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
++				this->onFileChanged(game, FILE_METADATA_CHANGED);
++			}
++		}, true, 3);
++	}
++	else if (transition_style == "fade" || transition_style == "fast fade")
+ 	{
+ 		int fadeDuration = (transition_style == "fast fade") ? 400 : 800; // Halve the duration for fast fade
+ 		// fade out, launch game, fade back in
+diff --git a/es-core/src/Splash.cpp b/es-core/src/Splash.cpp
+index 9858697..afa7fe3 100644
 --- a/es-core/src/Splash.cpp
 +++ b/es-core/src/Splash.cpp
 @@ -3,9 +3,78 @@
@@ -93,13 +230,13 @@
 +	mAnimCount = (int)mAnimTextures.size();
 +	mAnimCurrent = 0;
 +	mAnimStartTick = SDL_GetTicks();
-+	mAnimFrameMs = 57; // AURKNIX loading animation is 49 frames @ 57 ms/frame (~2.8 s loop)
++	mAnimFrameMs = 600; // AURKNIX loading animation is 5 frames @ 600 ms/frame (~3 s loop)
 +	return true;
 +}
  
  Splash::Splash(Window* window, const std::string image, bool fullScreenBackGround, IBindable* bindable) :
  	mBackground(window),
-@@ -17,6 +86,12 @@
+@@ -17,6 +86,12 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
  	mRoundCorners = 0.01;
  	mPercent = -1;
  
@@ -107,12 +244,12 @@
 +	mAnimCount = 0;
 +	mAnimCurrent = 0;
 +	mAnimStartTick = 0;
-+	mAnimFrameMs = 57;
++	mAnimFrameMs = 600;
 +
  	bool useOldSplashLayout = OLD_SPLASH_LAYOUT;
  
  	// Theme
-@@ -233,12 +308,22 @@
+@@ -233,12 +308,22 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
  
  	// Don't waste time in waiting for vsync
  	SDL_GL_SetSwapInterval(0);
@@ -135,7 +272,7 @@
  	for (auto extra : mExtras)
  		delete extra;
  
-@@ -264,6 +349,55 @@
+@@ -264,6 +349,55 @@ void Splash::render(float opacity, bool swapBuffers)
  	Renderer::setMatrix(trans);
  	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), (mBackgroundColor & 0xFFFFFF00) | alpha);
  
@@ -191,243 +328,37 @@
  	for (auto extra : mExtras)
  		extra->setOpacity(alpha);
  
-
---- a/es-app/src/views/ViewController.cpp
-+++ b/es-app/src/views/ViewController.cpp
-@@ -28,10 +28,15 @@
- #include "guis/GuiMsgBox.h"
- #include "utils/ThreadPool.h"
- #include <SDL_timer.h>
-+#include "utils/FileSystemUtil.h"
- #include "TextToSpeech.h"
- #include "VolumeControl.h"
- #include "guis/GuiNetPlay.h"
+diff --git a/es-core/src/Splash.h b/es-core/src/Splash.h
+index 2daf55e..80aa45e 100644
+--- a/es-core/src/Splash.h
++++ b/es-core/src/Splash.h
+@@ -38,4 +38,16 @@ private:
+ 	std::shared_ptr<TextureResource> mTexture;
  
-+// AURKNIX: path of the game-loading animation displayed before a game starts.
-+#define LAUNCH_LOADING_GIF "/usr/config/emulationstation/loading.gif"
-+#define LAUNCH_LOADING_HOLD_MS 3000
+ 	std::vector<GuiComponent*> mExtras;
 +
- ViewController* ViewController::sInstance = nullptr;
++	// AURKNIX: animated GIF splash support (used as the game-loading splash).
++	bool				mAnimated;
++	std::vector<unsigned int> mAnimTextures;
++	unsigned int		mAnimW;
++	unsigned int		mAnimH;
++	int					mAnimCount;
++	int					mAnimCurrent;
++	unsigned int		mAnimStartTick;
++	unsigned int		mAnimFrameMs;
++
++	bool loadGifAnimation(const std::string& path);
+ } ;
+diff --git a/locale/CMakeLists.txt b/locale/CMakeLists.txt
+index 25f3cd7..f1ebe79 100644
+--- a/locale/CMakeLists.txt
++++ b/locale/CMakeLists.txt
+@@ -3,7 +3,7 @@ file (GLOB es_PO_FILES ${dir}/locale/lang/*)
+ set(es_POT ${dir}/locale/emulationstation2.pot)
+ # update the pot
+ MESSAGE("Building the pot file")
+-add_custom_command (TARGET i18n COMMAND find "${dir}/es-app" "${dir}/es-core" -name "*.cpp" -o -name "*.h" | ${XGETTEXT_EXECUTABLE} --add-comments=TRANSLATION -f - -o ${es_POT} --no-location --keyword=_)
++add_custom_command (TARGET i18n COMMAND find "${dir}/es-app" "${dir}/es-core" -name "*.cpp" -o -name "*.h" | ${XGETTEXT_EXECUTABLE} --from-code=UTF-8 --add-comments=TRANSLATION -f - -o ${es_POT} --no-location --keyword=_)
+ add_custom_command (TARGET i18n COMMAND sed -i '/^\"POT-Creation-Date:/d' ${es_POT})
  
- ViewController* ViewController::get()
-@@ -565,9 +570,29 @@
- 	mLockInput = true;
- 
- 	GuiComponent::isLaunchTransitionRunning = true;
--		
-+
-+	// AURKNIX: number of loading-animation loops to play before a game starts
-+	// (0 disables the animation entirely). Read once here so all three
-+	// transition styles share the same value.
-+	const int loadingRounds = Settings::getInstance()->getInt("GameLoadingAnimationRounds");
-+
-+	// AURKNIX: custom loading animation file (empty falls back to the default
-+	// shipping animation). Read once here as well.
-+	std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
-+	if (loadingGif.empty())
-+		loadingGif = LAUNCH_LOADING_GIF;
-+
- 	if (!Settings::getInstance()->getBool("HideWindow"))
--		mWindow->setCustomSplashScreen(game->getImagePath(), game->getName(), game);
-+	{
-+		// AURKNIX: use the loading animation as the splash shown while the
-+		// game loads (falls back to the game cover art when disabled).
-+		std::string splashImage = game->getImagePath();
-+		if (loadingRounds > 0 &&
-+			Utils::FileSystem::exists(loadingGif))
-+			splashImage = loadingGif;
-+
-+		mWindow->setCustomSplashScreen(splashImage, game->getName(), game);
-+	}
- 
- 	std::string transition_style = Settings::GameTransitionStyle();
- 	if (transition_style.empty() || transition_style == "auto")
-@@ -595,8 +620,29 @@
- 		// fade out, launch game, fade back in
- 		auto fadeFunc = [this](float t) { mFadeOpacity = Math::lerp(0.0f, 1.0f, t); };
- 
--		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options]
-+		setAnimation(new LambdaAnimation(fadeFunc, fadeDuration), 0, [this, game, fadeFunc, options, loadingRounds]
- 		{
-+			// AURKNIX: play the loading animation for the configured loops before the game starts
-+			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
-+			{
-+				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, game, fadeFunc, options]
-+				{
-+					if (doLaunchGame(game, options))
-+					{
-+						GuiComponent::isLaunchTransitionRunning = false;
-+
-+						Window* w = mWindow;
-+						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
-+					}
-+					else
-+					{
-+						setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
-+						this->onFileChanged(game, FILE_METADATA_CHANGED);
-+					}
-+				}, true, 3);
-+				return;
-+			}
-+
- 			if (doLaunchGame(game, options))
- 			{
- 				GuiComponent::isLaunchTransitionRunning = false;
-@@ -615,8 +661,30 @@
- 	{
- 		int slideDuration = (transition_style == "fast slide") ? 750 : 1500; // Halve the duration for fast slide
- 		// move camera to zoom in on center + fade out, launch game, come back in
--		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options]
--		{			
-+		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, slideDuration), 0, [this, origCamera, center, game, options, loadingRounds]
-+		{
-+			// AURKNIX: play the loading animation for the configured loops before the game starts
-+			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
-+			{
-+				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
-+				{
-+					if (doLaunchGame(game, options))
-+					{
-+						GuiComponent::isLaunchTransitionRunning = false;
-+
-+						Window* w = mWindow;
-+						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
-+					}
-+					else
-+					{
-+						mCamera = origCamera;
-+						setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
-+						this->onFileChanged(game, FILE_METADATA_CHANGED);
-+					}
-+				}, true, 3);
-+				return;
-+			}
-+
- 			if (doLaunchGame(game, options))
- 			{
- 				GuiComponent::isLaunchTransitionRunning = false;
-@@ -634,8 +702,30 @@
- 	} 
- 	else // instant
- 	{ 		
--		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options]
--		{			
-+		setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this, origCamera, center, game, options, loadingRounds]
-+		{
-+			// AURKNIX: play the loading animation for the configured loops before the game starts
-+			if (loadingRounds > 0 && !Settings::getInstance()->getBool("HideWindow"))
-+			{
-+				setAnimation(new LambdaAnimation([](float){}, loadingRounds * LAUNCH_LOADING_HOLD_MS), 0, [this, origCamera, center, game, options]
-+				{
-+					if (doLaunchGame(game, options))
-+					{
-+						GuiComponent::isLaunchTransitionRunning = false;
-+
-+						Window* w = mWindow;
-+						mWindow->postToUiThread([w]() { reloadAllGames(w, false); });
-+					}
-+					else
-+					{
-+						mCamera = origCamera;
-+						setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this] { GuiComponent::isLaunchTransitionRunning = false; mLockInput = false; mWindow->closeSplashScreen(); }, true, 3);
-+						this->onFileChanged(game, FILE_METADATA_CHANGED);
-+					}
-+				}, true, 3);
-+				return;
-+			}
-+
- 			if (doLaunchGame(game, options))
- 			{
- 				GuiComponent::isLaunchTransitionRunning = false;
-
---- a/es-app/src/guis/GuiMenu.cpp
-+++ b/es-app/src/guis/GuiMenu.cpp
-@@ -4171,6 +4171,25 @@
- 
- 	s->addEntry(_("MOONLIGHT GAME STREAMING"), false, [this, window] { GuiMoonlight::show(mWindow); });
- 
-+	// AURKNIX: game loading animation (loops to play before a game starts; 0 = off)
-+	{
-+		auto loadingAnimation = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GAME LOADING ANIMATION"));
-+		loadingAnimation->addRange({
-+			{ _("OFF"), "0" },
-+			{ _("1 LOOP (~3s)"), "1" },
-+			{ _("2 LOOPS (~6s)"), "2" },
-+			{ _("3 LOOPS (~9s)"), "3" } },
-+			std::to_string(Settings::getInstance()->getInt("GameLoadingAnimationRounds")));
-+		s->addWithDescription(_("GAME LOADING ANIMATION"), _("Play the AURKNIX loading animation before a game starts, looping the selected number of times, then launch the game."), loadingAnimation);
-+		s->addSaveFunc([loadingAnimation] { Settings::getInstance()->setInt("GameLoadingAnimationRounds", std::stoi(loadingAnimation->getSelected())); });
-+
-+		// AURKNIX: optional custom GIF for the game loading animation
-+		std::string loadingGif = Settings::getInstance()->getString("GameLoadingAnimationFile");
-+		if (loadingGif.empty())
-+			Settings::getInstance()->setString("GameLoadingAnimationFile", "/usr/config/emulationstation/loading.gif");
-+		s->addFileBrowser(_("CUSTOM LOADING ANIMATION FILE"), "GameLoadingAnimationFile", GuiFileBrowser::FILES, true, "/usr/config/emulationstation");
-+	}
-+
- 	if (SystemConf::getInstance()->getBool("global.retroachievements") && !Settings::getInstance()->getBool("RetroachievementsMenuitem") && SystemConf::getInstance()->get("global.retroachievements.username") != "")
- 	{
- 		s->addEntry(_("RETROACHIEVEMENTS").c_str(), true, [this] 
-
---- a/es-app/src/guis/GuiSettings.h
-+++ b/es-app/src/guis/GuiSettings.h
-@@ -81,7 +81,7 @@
- 	
- 	void addInputTextConfigRow(const std::string& title, const std::string& settingsID, bool password, bool storeInSettings = false, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr);
-   	void addInputTextRow(const std::string& title, const std::string& value, bool password, const std::function<void(Window*, std::string/*title*/, std::string /*value*/, const std::function<void(std::string)>& onsave)>& customEditor = nullptr, const std::function<void(std::string)>& onsave = nullptr);
--	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false);
-+	void addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings = false, const std::string& copyToDir = "");
- 	
- 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged = nullptr) { return addSwitch(title, "", settingsID, storeInSettings, onChanged); }
- 	std::shared_ptr<SwitchComponent> addSwitch(const std::string& title, const std::string& description, const std::string& settingsID, bool storeInSettings, const std::function<void()>& onChanged);
-
---- a/es-app/src/guis/GuiSettings.cpp
-+++ b/es-app/src/guis/GuiSettings.cpp
-@@ -329,7 +329,7 @@
- 	addRow(row);
- }
- 
--void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings)
-+void GuiSettings::addFileBrowser(const std::string& title, const std::string& settingsID, GuiFileBrowser::FileTypes type, bool storeInSettings, const std::string& copyToDir)
- {
- 	Window* window = mWindow;
- 
-@@ -357,16 +357,34 @@
- 
- 	std::string localSettingsID = settingsID;
- 	bool localStoreInSettings = storeInSettings;
-+	std::string localCopyToDir = copyToDir;
- 
--	auto updateVal = [this, ed, localSettingsID, localStoreInSettings](const std::string &newVal)
-+	auto updateVal = [this, ed, localSettingsID, localStoreInSettings, localCopyToDir](const std::string &newVal)
- 	{
--		ed->setValue(newVal);			
-+		// AURKNIX: when a copyToDir is requested, copy the picked file there so
-+		// the setting keeps working even if the source storage is removed.
-+		std::string value = newVal;
-+		if (!localCopyToDir.empty() && !newVal.empty())
-+		{
-+			std::string fileName = Utils::FileSystem::getFileName(newVal);
-+			std::string dest = Utils::FileSystem::getCanonicalPath(localCopyToDir) + "/" + fileName;
-+			if (!fileName.empty() &&
-+				Utils::FileSystem::getCanonicalPath(newVal) != dest)
-+			{
-+				if (Utils::FileSystem::exists(dest))
-+					Utils::FileSystem::removeFile(dest);
-+				if (Utils::FileSystem::copyFile(newVal, dest))
-+					value = dest;
-+			}
-+		}
-+
-+		ed->setValue(value);
- 		mMenu.updateSize();
- 
- 		if (localStoreInSettings)
--			Settings::getInstance()->setString(localSettingsID, newVal);
-+			Settings::getInstance()->setString(localSettingsID, value);
- 		else
--			SystemConf::getInstance()->set(localSettingsID, newVal);
-+			SystemConf::getInstance()->set(localSettingsID, value);
- 	};
- 
- 	row.makeAcceptInputHandler([window, title, type, ed, updateVal]
+ foreach (es_PO_INPUT ${es_PO_FILES})
