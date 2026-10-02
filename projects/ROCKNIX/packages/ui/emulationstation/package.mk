@@ -107,8 +107,10 @@ makeinstall_target() {
   sed -i 's|</config>|  <string name="GameLoadingAnimationFile" value="/usr/config/emulationstation/loading.gif" />\n</config>|' \
     ${INSTALL}/usr/config/emulationstation/es_settings.cfg
 
-  # AURKNIX: ship the game-loading animation (animated splash source)
+  # AURKNIX: ship the game-loading animation (animated splash source + PNG frame
+  # sequence; the Splash loader prefers the PNG frames for reliability)
   cp ${PKG_DIR}/config/common/loading.gif ${INSTALL}/usr/config/emulationstation/loading.gif
+  cp ${PKG_DIR}/config/common/loading_0.png ${PKG_DIR}/config/common/loading_1.png ${PKG_DIR}/config/common/loading_2.png ${PKG_DIR}/config/common/loading_3.png ${PKG_DIR}/config/common/loading_4.png ${INSTALL}/usr/config/emulationstation/
 
   # Add device-specific settings for S905
   if [ "${DEVICE}" = "S905" ]; then

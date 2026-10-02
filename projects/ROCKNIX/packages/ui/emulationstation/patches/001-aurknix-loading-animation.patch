@@ -154,10 +154,10 @@ index 5af50b8..7f9c1ad 100644
  		int fadeDuration = (transition_style == "fast fade") ? 400 : 800; // Halve the duration for fast fade
  		// fade out, launch game, fade back in
 diff --git a/es-core/src/Splash.cpp b/es-core/src/Splash.cpp
-index 9858697..afa7fe3 100644
+index 9858697..0cdfbd0 100644
 --- a/es-core/src/Splash.cpp
 +++ b/es-core/src/Splash.cpp
-@@ -3,9 +3,78 @@
+@@ -3,9 +3,142 @@
  #include "Window.h"
  #include "resources/TextureResource.h"
  #include "components/NinePatchComponent.h"
@@ -167,21 +167,81 @@ index 9858697..afa7fe3 100644
  #include <SDL_events.h>
 +#include <SDL_timer.h>
 +#include <FreeImage.h>
++#include <cstdio>
  #include "BindingManager.h"
 +#include "renderers/Renderer.h"
++
++// AURKNIX: load a PNG frame sequence (loading_0.png, loading_1.png, ...) next to
++// the GIF. TextureResource-based, so it uses the same working image pipeline as
++// the UI itself — far more reliable than runtime FreeImage GIF decoding.
++bool Splash::loadPngSequence(const std::string& gifPath)
++{
++	std::string dir = Utils::FileSystem::getParent(gifPath);
++	if (dir.empty())
++		dir = "/usr/config/emulationstation";
++
++	FILE* giflog = fopen("/tmp/es_gif.log", "a");
++	if (giflog) fprintf(giflog, "loadPngSequence: %s\n", dir.c_str());
++
++	for (int i = 0; ; i++)
++	{
++		std::string png = dir + "/loading_" + std::to_string(i) + ".png";
++		if (!Utils::FileSystem::exists(png))
++		{
++			if (i == 0)
++			{
++				if (giflog) { fprintf(giflog, "  no loading_0.png, fall back to GIF\n"); fclose(giflog); }
++				return false;
++			}
++			break;
++		}
++
++		auto tex = TextureResource::get(png, true, false, true, false, false);
++		if (tex != nullptr && tex->isLoaded())
++		{
++			mPngTextures.push_back(tex);
++			if (giflog) fprintf(giflog, "  frame %d OK\n", i);
++		}
++		else if (giflog)
++			fprintf(giflog, "  frame %d FAILED to load\n", i);
++	}
++
++	if (mPngTextures.empty())
++	{
++		if (giflog) { fprintf(giflog, "  no frames loaded\n"); fclose(giflog); }
++		return false;
++	}
++
++	mAnimCount = (int)mPngTextures.size();
++	mAnimCurrent = 0;
++	mAnimStartTick = SDL_GetTicks();
++	mAnimFrameMs = 600; // 5 frames @ 600 ms/frame (~3 s loop)
++	if (giflog) { fprintf(giflog, "  OK, %d png frames\n", mAnimCount); fclose(giflog); }
++	return true;
++}
 +
 +// AURKNIX: load an animated GIF into per-frame GL textures. FreeImage 32-bit
 +// pixels are stored BGRA in memory, the renderer expects RGBA.
 +bool Splash::loadGifAnimation(const std::string& path)
 +{
++	FILE* giflog = fopen("/tmp/es_gif.log", "a");
++	if (giflog) fprintf(giflog, "loadGifAnimation: %s\n", path.c_str());
++
++	FreeImage_Initialise(); // safe to call multiple times
++
 +	FIMULTIBITMAP* mb = FreeImage_OpenMultiBitmap(FIF_GIF, path.c_str(), true, false, GIF_PLAYBACK);
 +	if (mb == nullptr)
++	{
++		if (giflog) { fprintf(giflog, "  OpenMultiBitmap FAILED\n"); fclose(giflog); }
 +		return false;
++	}
 +
 +	int pages = FreeImage_GetPageCount(mb);
++	if (giflog) fprintf(giflog, "  pages=%d\n", pages);
 +	if (pages <= 0)
 +	{
 +		FreeImage_CloseMultiBitmap(mb, 0);
++		if (giflog) { fprintf(giflog, "  no pages\n"); fclose(giflog); }
 +		return false;
 +	}
 +
@@ -225,18 +285,22 @@ index 9858697..afa7fe3 100644
 +	FreeImage_CloseMultiBitmap(mb, 0);
 +
 +	if (mAnimTextures.empty())
++	{
++		if (giflog) { fprintf(giflog, "  no textures created\n"); fclose(giflog); }
 +		return false;
++	}
 +
 +	mAnimCount = (int)mAnimTextures.size();
 +	mAnimCurrent = 0;
 +	mAnimStartTick = SDL_GetTicks();
 +	mAnimFrameMs = 600; // AURKNIX loading animation is 5 frames @ 600 ms/frame (~3 s loop)
++	if (giflog) { fprintf(giflog, "  OK, %d gif textures\n", mAnimCount); fclose(giflog); }
 +	return true;
 +}
  
  Splash::Splash(Window* window, const std::string image, bool fullScreenBackGround, IBindable* bindable) :
  	mBackground(window),
-@@ -17,6 +86,12 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
+@@ -17,6 +150,12 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
  	mRoundCorners = 0.01;
  	mPercent = -1;
  
@@ -249,13 +313,15 @@ index 9858697..afa7fe3 100644
  	bool useOldSplashLayout = OLD_SPLASH_LAYOUT;
  
  	// Theme
-@@ -233,12 +308,22 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
+@@ -233,12 +372,25 @@ Splash::Splash(Window* window, const std::string image, bool fullScreenBackGroun
  
  	// Don't waste time in waiting for vsync
  	SDL_GL_SetSwapInterval(0);
 +
-+	// AURKNIX: if the splash image is an animated GIF, decode it into
-+	// per-frame textures so it can be played while a game is loading.
++	// AURKNIX: try a PNG frame sequence first (robust native image pipeline),
++	// then fall back to decoding the animated GIF into per-frame textures.
++	if (mAnimated == false)
++		mAnimated = loadPngSequence(image);
 +	if (mAnimated == false && Utils::String::toLower(Utils::FileSystem::getExtension(image)) == ".gif")
 +		mAnimated = loadGifAnimation(image);
  }
@@ -268,17 +334,18 @@ index 9858697..afa7fe3 100644
 +		Renderer::destroyTexture(tex);
 +
 +	mAnimTextures.clear();
++	mPngTextures.clear();
 +
  	for (auto extra : mExtras)
  		delete extra;
  
-@@ -264,6 +349,55 @@ void Splash::render(float opacity, bool swapBuffers)
+@@ -264,6 +416,58 @@ void Splash::render(float opacity, bool swapBuffers)
  	Renderer::setMatrix(trans);
  	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), (mBackgroundColor & 0xFFFFFF00) | alpha);
  
 +	// AURKNIX: animated GIF mode — draw the current frame (4:3, centered) and
 +	// skip the static background / progress UI.
-+	if (mAnimated && !mAnimTextures.empty())
++	if (mAnimated && (!mPngTextures.empty() || !mAnimTextures.empty()))
 +	{
 +		unsigned int now = SDL_GetTicks();
 +		if (mAnimStartTick == 0)
@@ -286,7 +353,10 @@ index 9858697..afa7fe3 100644
 +		int frame = (int)((now - mAnimStartTick) / mAnimFrameMs);
 +		mAnimCurrent = frame % mAnimCount;
 +
-+		Renderer::bindTexture(mAnimTextures[mAnimCurrent]);
++		if (!mPngTextures.empty())
++			mPngTextures[mAnimCurrent]->bind();
++		else
++			Renderer::bindTexture(mAnimTextures[mAnimCurrent]);
 +
 +		float sw = (float)Renderer::getScreenWidth();
 +		float sh = (float)Renderer::getScreenHeight();
@@ -329,17 +399,18 @@ index 9858697..afa7fe3 100644
  		extra->setOpacity(alpha);
  
 diff --git a/es-core/src/Splash.h b/es-core/src/Splash.h
-index 2daf55e..80aa45e 100644
+index 2daf55e..70b69c8 100644
 --- a/es-core/src/Splash.h
 +++ b/es-core/src/Splash.h
-@@ -38,4 +38,16 @@ private:
+@@ -38,4 +38,18 @@ private:
  	std::shared_ptr<TextureResource> mTexture;
  
  	std::vector<GuiComponent*> mExtras;
 +
-+	// AURKNIX: animated GIF splash support (used as the game-loading splash).
++	// AURKNIX: animated splash support (PNG frame sequence first, GIF fallback).
 +	bool				mAnimated;
 +	std::vector<unsigned int> mAnimTextures;
++	std::vector<std::shared_ptr<TextureResource>> mPngTextures;
 +	unsigned int		mAnimW;
 +	unsigned int		mAnimH;
 +	int					mAnimCount;
@@ -347,6 +418,7 @@ index 2daf55e..80aa45e 100644
 +	unsigned int		mAnimStartTick;
 +	unsigned int		mAnimFrameMs;
 +
++	bool loadPngSequence(const std::string& gifPath);
 +	bool loadGifAnimation(const std::string& path);
  } ;
 diff --git a/locale/CMakeLists.txt b/locale/CMakeLists.txt
