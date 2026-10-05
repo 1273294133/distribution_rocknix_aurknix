@@ -1,6 +1,6 @@
 > 🙏 特别感谢 **KK 大神**（微信公众号：k源机）对本项目设备适配与固件资源的支持。
 
-> 🙏 也感谢 **豆包 AI** 协助完成镜像构建、疑难问题修复与开机画面 / 加载动画设计。
+> 🙏 也感谢 **豆包 AI** 协助完成镜像构建与疑难问题修复。
 
 <img src="https://github.com/AveyondFly/distribution_rocknix/blob/next/distributions/ROCKNIX/logos/rocknix-logo.png?raw=yes" width=192>
 
@@ -25,26 +25,8 @@
 
 ---
 
-### 🎨 界面预览（R36S）
-
-#### 开机画面（Splash）
-
-开机即显示，Press Start 2P 像素风：大号 **R36S**（R/S 蓝 `rgb(95,95,255)`、3/6 红 `rgb(255,95,95)`，带 8-bit 像素阴影），右下角小号浅灰 **AURKNIX** 徽标。
-
-![R36S 开机画面](docs/r36s-splash.png)
-
-#### 游戏加载动画（进入游戏前）
-
-点选游戏 → 过渡动画 → **AURKNIX 加载动画**（约 3 秒一轮，NOW LOADING 点号循环）→ 进入游戏。可在 **游戏设置（GAME SETTINGS）→ 游戏加载动画** 中设置：
-
-- **游戏加载动画**：关闭 / 1 轮（约3秒）/ 2 轮（约6秒）/ 3 轮（约9秒）
-- **自定义加载动画文件**：选择你自己的 GIF（选择时自动复制到系统卡，拔掉游戏卡动画仍可用）
-
-![游戏加载动画](docs/game-loading.gif)
-
 #### ✨ 本次 R36S 构建（2026-10-02）修复与特性
 
-- **R36S 像素风开机画面（放大版）**：Press Start 2P 像素风（R/S 蓝、3/6 红）+ 右下角 AURKNIX 徽标，R36S 主标题放大至约 28% 屏高（旧版 12% 的 2.3 倍）
 - **Bezels 直链修复**：边框包下载改用直链，避免构建时下载失败
 - **ntfs-3g_ntfsprogs 换源**：tuxera.com 在 CI 不可达 → 改用 `sources-mirror` 镜像，NTFS 读写支持保持完整
 - **glib/gtk3 工具链修复**：`glib-compile-resources` / `glib-genmarshal` / `glib-mkenums` 等 .pc 工具变量统一指向交叉编译工具链，修复 json-glib / gtk3 交叉编译失败
