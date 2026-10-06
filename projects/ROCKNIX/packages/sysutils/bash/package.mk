@@ -7,7 +7,7 @@ PKG_NAME="bash"
 PKG_VERSION="5.3"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.gnu.org/software/bash/"
-PKG_URL="http://ftp.gnu.org/gnu/bash/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_TARGET="toolchain ncurses readline"
 PKG_LONGDESC="The GNU Bourne Again shell."
 
