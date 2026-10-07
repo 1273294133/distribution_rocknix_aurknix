@@ -19,9 +19,12 @@ if [ ! "${OPENGL}" = "no" ]; then
 fi
 
 pre_configure_target() {
-  # bfd linker needs libs in link order; the make command-line LDFLAGS+ does not
-  # reach amiberry's link step, so push them through the env (logg/lz proven)
-  export LDFLAGS="${LDFLAGS} -logg -lz -lSDL2"
+  # bfd needs libs in link order. The make command-line LDFLAGS+ never reaches
+  # the link step, and env LDFLAGS lands BEFORE -lFLAC/-lmpg123 (Makefile line 53),
+  # so -logg there is too early for FLAC->ogg. Keep -lz/-lSDL2 in env (their
+  # symbols come from the .o files, pulled in early), and append -logg AFTER
+  # -lstdc++fs on the FLAC line so bfd resolves libFLAC.a(ogg_decoder_aspect).
+  export LDFLAGS="${LDFLAGS} -lz -lSDL2"
 
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
@@ -29,6 +32,7 @@ pre_configure_target() {
   AMIBERRY_PLATFORM="PLATFORM=${DEVICE}"
 
   sed -i "s|AS     = as|AS     \?= as|" Makefile
+  sed -i "s|-lstdc++fs|-lstdc++fs -logg|" Makefile
   PKG_MAKE_OPTS_TARGET+="${AMIBERRY_PLATFORM} all SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config"
 }
 
