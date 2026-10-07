@@ -23,6 +23,7 @@ pre_configure_target() {
 
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
+  export USE_LD=bfd
   AMIBERRY_PLATFORM="PLATFORM=${DEVICE}"
 
   sed -i "s|AS     = as|AS     \?= as|" Makefile
