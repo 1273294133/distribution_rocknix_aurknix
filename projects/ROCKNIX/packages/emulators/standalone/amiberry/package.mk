@@ -27,7 +27,7 @@ pre_configure_target() {
   AMIBERRY_PLATFORM="PLATFORM=${DEVICE}"
 
   sed -i "s|AS     = as|AS     \?= as|" Makefile
-  PKG_MAKE_OPTS_TARGET+="${AMIBERRY_PLATFORM} all SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config LDFLAGS+=-lz -logg"
+  PKG_MAKE_OPTS_TARGET+="${AMIBERRY_PLATFORM} all SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config LDFLAGS+=-lSDL2 -lz -logg"
 }
 
 makeinstall_target() {
