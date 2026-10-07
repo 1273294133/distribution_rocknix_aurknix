@@ -19,7 +19,9 @@ if [ ! "${OPENGL}" = "no" ]; then
 fi
 
 pre_configure_target() {
-  export LDFLAGS="${LDFLAGS} -logg"
+  # bfd linker needs libs in link order; the make command-line LDFLAGS+ does not
+  # reach amiberry's link step, so push them through the env (logg/lz proven)
+  export LDFLAGS="${LDFLAGS} -logg -lz -lSDL2"
 
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
@@ -27,7 +29,7 @@ pre_configure_target() {
   AMIBERRY_PLATFORM="PLATFORM=${DEVICE}"
 
   sed -i "s|AS     = as|AS     \?= as|" Makefile
-  PKG_MAKE_OPTS_TARGET+="${AMIBERRY_PLATFORM} all SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config LDFLAGS+=-lSDL2 -lz -logg"
+  PKG_MAKE_OPTS_TARGET+="${AMIBERRY_PLATFORM} all SDL_CONFIG=${SYSROOT_PREFIX}/usr/bin/sdl2-config"
 }
 
 makeinstall_target() {
