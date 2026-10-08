@@ -2,14 +2,16 @@
 # Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 # Adapted for ROCKNIX S905 chain-boot (CoreELEC Amlogic-no compatible)
 
+# ramdisk MUST be gzip (or uncompressed) for old GXL-era stock U-Boot:
+# zstd ramdisk fails bootm on 2017 Amlogic U-Boot -> black screen reboot loop
 INITRAMFS="${1}.cpio"
 RAMDISK=${BUILD}/image/${INITRAMFS}
 
 echo
-echo "Compressing ${INITRAMFS} with zstd"
+echo "Compressing ${INITRAMFS} with gzip"
 stat -c "  %s bytes  %n" ${RAMDISK}
-zstd -q -f ${RAMDISK}
-RAMDISK=${RAMDISK}.zst
+gzip -9 -f ${RAMDISK}
+RAMDISK=${RAMDISK}.gz
 stat -c "  %s bytes  %n" ${RAMDISK}
 
 LDFLAGS="" mkbootimg --kernel arch/${TARGET_KERNEL_ARCH}/boot/${KERNEL_TARGET} --ramdisk ${RAMDISK} \
