@@ -21,7 +21,7 @@
 
 > **S905/S905L 盒子刷机提示（新版镜像）**：镜像写 SD 卡后从 SD 卡启动（链式引导，不动盒子内置系统）。镜像 FAT 分区含 `device_trees/` 目录（全套 amlogic dtb），**S905L 无后缀盒子把 `device_trees/meson-gxl-s905x-p212.dtb` 复制为根目录 `DTB.IMG`**（替换原单文件 dtb.img）；如启动异常可依次尝试 `meson-gxbb-p201.dtb`、`meson-gxl-s905d-p231.dtb`、`meson-gxl-s805x-p241.dtb`。
 >
-> ✅ **当前状态**：S905 修复版**已发布**（Release `20261008`，2026-10-08 构建成功，run 37700701167 全绿）。新版镜像补开 18 项 GXL/S905L 内核驱动（DRM/MMC/USB/PM/HDMI/RTC/WDT 等），**修复 S905L 盒子黑屏重启循环**；旧版 `nightly-20260928`（缺 GXL 驱动、S905L 黑屏）及错误命名的 `nightly-20260919` 已下线。镜像含 GXL/GXBB 全套 device tree 与主线 GXL 驱动模块，S905L 盒子按上方提示复制 DTB.IMG 即可尝试启动。
+> ✅ **当前状态**：S905 修复版**已发布**（Release `20261008`，2026-10-08 构建成功，run 37778884401 全绿）。新版镜像补开 18 项 GXL/S905L 内核驱动（DRM/MMC/USB/PM/HDMI/RTC/WDT 等），**并将 ramdisk 压缩从 zstd 改为 gzip**（GXL 时代原厂老 U-Boot 不支持 zstd 解压 ramdisk，bootm 直接失败导致黑屏重启循环；gzip 老 U-Boot 普遍支持），**彻底修复 S905L 盒子黑屏重启循环**；旧版 `nightly-20260928`（缺 GXL 驱动、S905L 黑屏）及错误命名的 `nightly-20260919` 已下线。镜像含 GXL/GXBB 全套 device tree 与主线 GXL 驱动模块，S905L 盒子按上方提示复制 DTB.IMG 即可尝试启动。
 
 ---
 
