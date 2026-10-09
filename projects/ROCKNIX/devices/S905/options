@@ -30,7 +30,7 @@
     KERNEL_TARGET="Image.lzo"
     KERNEL_NAME="kernel.img"
     BUILD_ANDROID_BOOTIMG="yes"
-    ANDROID_BOOTIMG_OPTIONS="--base 0x0 --kernel_offset 0x2000000"
+    ANDROID_BOOTIMG_OPTIONS="--base 0x0 --kernel_offset 0x1080000"
 
   # Kernel extra targets to build (vendor common_drivers dtstree)
     KERNEL_MAKE_EXTRACMD=" dtbs"
