@@ -53,24 +53,4 @@ post_makeinstall_target() {
       sed -e 's#bindir=\${prefix}/bin#bindir='"${TOOLCHAIN}"'/bin#' -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e 's#\${bindir}/glib-compile-resources#'"${TOOLCHAIN}"'/bin/glib-compile-resources#' -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -e "s#/usr/bin/gdbus-codegen#${TOOLCHAIN}/bin/gdbus-codegen#" -e "s#^gdbus_codegen=.*#gdbus_codegen=${TOOLCHAIN}/bin/gdbus-codegen#" -i "${pc}"
     fi
   done
-
-  # Mirror pc files between usr/lib and usr/lib32 so downstream pkg-config finds
-  # glib regardless of which libdir the build adds to PKG_CONFIG_LIBDIR (arm
-  # 32-bit installs land in lib32; some consumers only search usr/lib/pkgconfig
-  # and then meson falls back to a wrap subproject that can fail hard on the
-  # runner with "Subproject exists but has no meson.build").
-  for base in gio-2.0.pc glib-2.0.pc gobject-2.0.pc gmodule-2.0.pc gthread-2.0.pc gio-unix-2.0.pc; do
-    if [ -f "${INSTALL}/usr/lib32/pkgconfig/${base}" ] && [ ! -f "${INSTALL}/usr/lib/pkgconfig/${base}" ]; then
-      cp -f "${INSTALL}/usr/lib32/pkgconfig/${base}" "${INSTALL}/usr/lib/pkgconfig/"
-    fi
-    if [ -f "${INSTALL}/usr/lib/pkgconfig/${base}" ] && [ ! -f "${INSTALL}/usr/lib32/pkgconfig/${base}" ]; then
-      cp -f "${INSTALL}/usr/lib/pkgconfig/${base}" "${INSTALL}/usr/lib32/pkgconfig/"
-    fi
-    if [ -f "${SYSROOT_PREFIX}/usr/lib32/pkgconfig/${base}" ] && [ ! -f "${SYSROOT_PREFIX}/usr/lib/pkgconfig/${base}" ]; then
-      cp -f "${SYSROOT_PREFIX}/usr/lib32/pkgconfig/${base}" "${SYSROOT_PREFIX}/usr/lib/pkgconfig/"
-    fi
-    if [ -f "${SYSROOT_PREFIX}/usr/lib/pkgconfig/${base}" ] && [ ! -f "${SYSROOT_PREFIX}/usr/lib32/pkgconfig/${base}" ]; then
-      cp -f "${SYSROOT_PREFIX}/usr/lib/pkgconfig/${base}" "${SYSROOT_PREFIX}/usr/lib32/pkgconfig/"
-    fi
-  done
 }
