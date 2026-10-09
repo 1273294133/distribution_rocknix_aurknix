@@ -10,7 +10,7 @@ PKG_SITE="https://www.gtk.org/"
 PKG_URL="https://download.gnome.org/sources/glib/$(get_pkg_version_maj_min)/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 PKG_DEPENDS_HOST="libffi:host pcre2:host Python3:host meson:host ninja:host"
 PKG_DEPENDS_TARGET="meson:host ninja:host gcc:host glib:host libffi pcre2 Python3:host util-linux zlib"
-PKG_STAMP="20261007-gdbus-codegen-fix"
+PKG_STAMP="20261009-gdbus-codegen-fix2"
 PKG_LONGDESC="A library which includes support routines for C such as lists, trees, hashes, memory allocation."
 
 PKG_MESON_OPTS_HOST="-Ddefault_library=static \
@@ -50,7 +50,7 @@ post_makeinstall_target() {
   # the whole post_makeinstall before later files are rewritten.
   for pc in ${SYSROOT_PREFIX}/usr/lib/pkgconfig/gio-2.0.pc ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/gio-2.0.pc ${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib/pkgconfig/glib-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/glib-2.0.pc; do
     if [ -f "${pc}" ]; then
-      sed -e 's#bindir=\${prefix}/bin#bindir='"${TOOLCHAIN}"'/bin#' -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e 's#\${bindir}/glib-compile-resources#'"${TOOLCHAIN}"'/bin/glib-compile-resources#' -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -e "s#/usr/bin/gdbus-codegen#${TOOLCHAIN}/bin/gdbus-codegen#" -i "${pc}"
+      sed -e 's#bindir=\${prefix}/bin#bindir='"${TOOLCHAIN}"'/bin#' -e "s#bindir=/usr/bin#bindir=${TOOLCHAIN}/bin#" -e "s#/usr/bin/glib-genmarshal#${TOOLCHAIN}/bin/glib-genmarshal#" -e "s#/usr/bin/glib-mkenums#${TOOLCHAIN}/bin/glib-mkenums#" -e 's#\${bindir}/glib-compile-resources#'"${TOOLCHAIN}"'/bin/glib-compile-resources#' -e "s#/usr/bin/glib-compile-resources#${TOOLCHAIN}/bin/glib-compile-resources#" -e "s#/usr/bin/gdbus-codegen#${TOOLCHAIN}/bin/gdbus-codegen#" -e "s#^gdbus_codegen=.*#gdbus_codegen=${TOOLCHAIN}/bin/gdbus-codegen#" -i "${pc}"
     fi
   done
 }

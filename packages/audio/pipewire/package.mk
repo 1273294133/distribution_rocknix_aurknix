@@ -75,6 +75,17 @@ PKG_MESON_OPTS_TARGET="-Ddocs=disabled \
                        -Dlibcanberra=disabled \
                        -Dlegacy-rtkit=false"
 
+pre_configure_target() {
+  # gio-2.0.pc may carry gdbus_codegen=${bindir}/gdbus-codegen or a literal host
+  # /usr/bin/gdbus-codegen (missing on runners without libglib2.0-dev-bin). Force the
+  # toolchain copy so meson's dependency('gio-2.0') tool lookup succeeds.
+  for pc in ${SYSROOT_PREFIX}/usr/lib/pkgconfig/gio-2.0.pc ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib/pkgconfig/gio-2.0.pc ${INSTALL}/usr/lib32/pkgconfig/gio-2.0.pc; do
+    if [ -f "${pc}" ]; then
+      sed -i "s#^gdbus_codegen=.*#gdbus_codegen=${TOOLCHAIN}/bin/gdbus-codegen#" "${pc}"
+    fi
+  done
+}
+
 post_makeinstall_target() {
   # connect to the system bus
   sed '/^\[Service\]/a Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket' -i ${INSTALL}/usr/lib/systemd/system/pipewire.service
