@@ -1,12 +1,23 @@
 defenv
 setenv bootfromnand 0
 setenv upgrade_step 2
-setenv sddtb 'if fatload mmc 0 ${dtb_mem_addr} dtb.img; then else store dtb read $dtb_mem_addr; fi'
-setenv usbdtb 'if fatload usb 0 ${dtb_mem_addr} dtb.img; then else store dtb read $dtb_mem_addr; fi'
-setenv bootfromsd 'mmcinfo; if fatload mmc 0 ${loadaddr} kernel.img; then run sddtb; setenv bootargs ${bootargs} bootfromsd BOOT_IMAGE=kernel.img boot=LABEL=AURKNIX disk=LABEL=STORAGE; bootm; fi'
-setenv bootfromusb 'usb start 0; if fatload usb 0 ${loadaddr} kernel.img; then run usbdtb; setenv bootargs ${bootargs} bootfromusb BOOT_IMAGE=kernel.img boot=LABEL=AURKNIX disk=LABEL=STORAGE; bootm; fi'
-setenv bootcmd 'if test ${bootfromnand} = 1; then setenv bootfromnand 0; saveenv; else run bootfromsd; run bootfromusb; fi; run storeboot'
+# bootstage.txt boot log: write ASCII progress markers to the boot FAT so a
+# black-screen failure can be diagnosed from the card/disk (A=start B=kernel
+# loaded C=dtb phase D=bootm E=bootm returned). All steps are if-guarded and
+# use a scratch addr (0x1d000000) far from loadaddr/kernel_addr; if the old
+# GXL U-Boot lacks fatwrite the if simply fails and boot continues.
+setenv bootstage_a 'mw.b 0x1d000000 0x41 8; if fatwrite mmc 0 0x1d000000 bootstage.txt 8; then; fi'
+setenv bootstage_b 'mw.b 0x1d000000 0x42 8; if fatwrite mmc 0 0x1d000000 bootstage.txt 8; then; fi'
+setenv bootstage_c 'mw.b 0x1d000000 0x43 8; if fatwrite mmc 0 0x1d000000 bootstage.txt 8; then; fi'
+setenv bootstage_d 'mw.b 0x1d000000 0x44 8; if fatwrite mmc 0 0x1d000000 bootstage.txt 8; then; fi'
+setenv bootstage_e 'mw.b 0x1d000000 0x45 8; if fatwrite mmc 0 0x1d000000 bootstage.txt 8; then; fi'
+setenv sddtb 'run bootstage_c; if fatload mmc 0 ${dtb_mem_addr} dtb.img; then else store dtb read $dtb_mem_addr; fi'
+setenv usbdtb 'run bootstage_c; if fatload usb 0 ${dtb_mem_addr} dtb.img; then else store dtb read $dtb_mem_addr; fi'
+setenv bootfromsd 'mmcinfo; if fatload mmc 0 ${loadaddr} kernel.img; then run bootstage_b; run sddtb; setenv bootargs ${bootargs} bootfromsd BOOT_IMAGE=kernel.img boot=LABEL=AURKNIX disk=LABEL=STORAGE loglevel=7; run bootstage_d; bootm; run bootstage_e; fi'
+setenv bootfromusb 'usb start 0; if fatload usb 0 ${loadaddr} kernel.img; then run bootstage_b; run usbdtb; setenv bootargs ${bootargs} bootfromusb BOOT_IMAGE=kernel.img boot=LABEL=AURKNIX disk=LABEL=STORAGE loglevel=7; run bootstage_d; bootm; run bootstage_e; fi'
+setenv bootcmd 'if test ${bootfromnand} = 1; then setenv bootfromnand 0; saveenv; else run bootstage_a; run bootfromsd; run bootfromusb; fi; run storeboot'
 saveenv
 run storeargs
+run bootstage_a
 run bootfromsd
 run bootfromusb
