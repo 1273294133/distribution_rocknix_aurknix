@@ -22,6 +22,28 @@ configure_package() {
 }
 
 pre_configure_target() {
+  # pango's meson falls back to its bundled glib wrap subproject whenever the
+  # toolchain glib-2.0.pc is not visible (arm builds install glib pc under
+  # usr/lib32 which is not on the default PKG_CONFIG_LIBDIR; a concurrent glib
+  # rebuild can also temporarily hide it). The wrap download on the runner is
+  # unreliable and fails hard ("Subproject exists but has no meson.build").
+  # Drop the wrap, wait briefly for the toolchain glib pc, mirror it into
+  # usr/lib, and add usr/lib32 to the search path so meson must use the
+  # toolchain glib.
+  rm -rf ${PKG_BUILD}/subprojects
+  for i in $(seq 1 30); do
+    if [ -f ${SYSROOT_PREFIX}/usr/lib/pkgconfig/glib-2.0.pc ] || \
+       [ -f ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/glib-2.0.pc ]; then
+      break
+    fi
+    sleep 5
+  done
+  for base in glib-2.0.pc gio-2.0.pc gobject-2.0.pc gmodule-2.0.pc gthread-2.0.pc gio-unix-2.0.pc; do
+    if [ -f ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/${base} ] && [ ! -f ${SYSROOT_PREFIX}/usr/lib/pkgconfig/${base} ]; then
+      cp -f ${SYSROOT_PREFIX}/usr/lib32/pkgconfig/${base} ${SYSROOT_PREFIX}/usr/lib/pkgconfig/
+    fi
+  done
+  export PKG_CONFIG_LIBDIR="${SYSROOT_PREFIX}/usr/lib/pkgconfig:${SYSROOT_PREFIX}/usr/lib32/pkgconfig:${SYSROOT_PREFIX}/usr/share/pkgconfig"
   PKG_MESON_OPTS_TARGET="-Dgtk_doc=false \
                          -Dintrospection=disabled"
 }
