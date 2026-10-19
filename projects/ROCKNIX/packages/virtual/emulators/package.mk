@@ -41,6 +41,8 @@ case "${DEVICE}" in
     [ "${ENABLE_32BIT}" == "true" ] && EMUS_32BIT="box86 desmume-lr gpsp-lr gpsp_ezode-lr pcsx_rearmed-lr"
     PKG_DEPENDS_TARGET+=" common-shaders glsl-shaders"
     PKG_EMUS+=" box64 drastic-sa drastic_adv-sa mednafen portmaster scummvmsa yabasanshiro-sa duckstation-sa"
+    # tic80-lr fails on the freshly built RK3326 toolchain (vendor/zip strncpy -Werror under newer GCC), same as S905 — exclude it.
+    LIBRETRO_CORES="$(printf '%s' "${LIBRETRO_CORES}" | sed 's/tic80-lr//g')"
     LIBRETRO_CORES+=" flycast2021-lr geolith-lr uae4arm"
     PKG_RETROARCH+=" retropie-shaders"
     PKG_EMUS+=" ppsspp2021-sa"
