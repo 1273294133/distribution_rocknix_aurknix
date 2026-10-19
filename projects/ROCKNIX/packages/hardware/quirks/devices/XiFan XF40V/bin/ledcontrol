@@ -1,43 +1,52 @@
 #!/bin/bash
 
+if [ "$1" = "list" ]; then
+cat <<EOF
+off
+red
+blue
+purple
+EOF
+  exit 0
+fi
+
 . /etc/profile
 
 # 获取脚本的第一个参数，即颜色名称
-COLOR=$1
+COLOR=${1:-$(get_setting led.color)}
+case ${COLOR} in
+  poweroff)
+    # Temporary shutdown/suspend state; do not overwrite the saved color.
+    COLOR=off
+    ;;
+  *_off)
+    COLOR=off
+    set_setting led.color "${COLOR}"
+    ;;
+  *_on)
+    COLOR=${COLOR%_on}
+    [ "${COLOR}" = "all" ] && COLOR=purple
+    set_setting led.color "${COLOR}"
+    ;;
+esac
 
-if [ ! -d /sys/class/gpio/gpio0 ]; then
-  echo 0 > /sys/class/gpio/export
-  echo out > /sys/class/gpio/gpio0/direction
-fi
-if [ ! -d /sys/class/gpio/gpio17 ]; then
-  echo 17 > /sys/class/gpio/export
-  echo out > /sys/class/gpio/gpio17/direction
-fi
 
 # 根据颜色名称设置 LED 状态
 case $COLOR in
-    all_on)
-    echo 1 > /sys/class/gpio/gpio0/value
-    echo 1 > /sys/class/gpio/gpio17/value
+    purple)
+    echo 1 > /sys/class/leds/power:blue/brightness
+    echo 1 > /sys/class/leds/power:red/brightness
         ;;
-    blue_on)
-    echo 1 > /sys/class/gpio/gpio0/value
-    echo 0 > /sys/class/gpio/gpio17/value
+    blue)
+    echo 1 > /sys/class/leds/power:blue/brightness
+    echo 0 > /sys/class/leds/power:red/brightness
         ;;
-    red_on)
-    echo 0 > /sys/class/gpio/gpio0/value
-    echo 1 > /sys/class/gpio/gpio17/value
+    red)
+    echo 0 > /sys/class/leds/power:blue/brightness
+    echo 1 > /sys/class/leds/power:red/brightness
         ;;
-    all_off)
-    echo 0 > /sys/class/gpio/gpio0/value
-    echo 0 > /sys/class/gpio/gpio17/value
+    off)
+    echo 0 > /sys/class/leds/power:blue/brightness
+    echo 0 > /sys/class/leds/power:red/brightness
         ;;
-    list)
-cat <<EOF
-all_off
-red_on
-blue_on
-all_on
-EOF
-  ;;
 esac
