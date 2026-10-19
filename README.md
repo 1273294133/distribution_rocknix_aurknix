@@ -7,7 +7,7 @@
 > ### ⚡ 本仓库是 **AURKNIX 的 AI 魔改版**：在 [AURKNIX (AveyondFly/distribution_rocknix)](https://github.com/AveyondFly/distribution_rocknix) 基础上深度魔改，用于**兼容老晶晨（Amlogic）芯片**设备（S905 / S905L / GXL 平台电视盒子等），并提供可直接刷写的固件镜像（能用就行，暂无持续更新维护）。
 
 [![Amlogic S905 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=20261009&label=Amlogic%20S905%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261009)
-[![R36S 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=R36S%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261002)
+[![R36S 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=R36S%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261019)
 
 > ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者手头只有 **S905L 电视盒子** 和 **R36S 寨机**两类设备，因此仅对这两类做了实机适配与验证；其他型号（如 S905X / S905M / S905D 等衍生型号）理论上兼容，但**未经实机测试**，刷机前请自行评估风险。
 
@@ -16,7 +16,7 @@
 | 目标设备 | 最新固件 |
 |---|---|
 | **Amlogic S905 / S905L 电视盒子**（AURKNIX S905 aarch64 镜像） | [![S905 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20S905%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261009) |
-| **R36S 掌机**（R36S / RGB10 / XU10 等，AURKNIX R36S aarch64 镜像） | [![R36S 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20R36S%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261002) |
+| **R36S 掌机**（R36S / RGB10 / XU10 等，AURKNIX R36S aarch64 镜像） | [![R36S 镜像下载](https://img.shields.io/badge/%F0%9F%93%A5%20R36S%20%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD-16a34a?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261019) |
 | 查看全部历史版本 | [![全部 Release](https://img.shields.io/badge/%E5%85%A8%E9%83%A8%20Release-64748b?style=for-the-badge&logo=github)](https://github.com/1273294133/distribution_rocknix_aurknix/releases) |
 
 > **S905/S905L 盒子刷机提示（新版镜像）**：镜像写 SD 卡后从 SD 卡启动（链式引导，不动盒子内置系统）。镜像 FAT 分区含 `device_trees/` 目录（全套 amlogic dtb），**S905L 无后缀盒子把 `device_trees/meson-gxl-s905x-p212.dtb` 复制为根目录 `DTB.IMG`**（替换原单文件 dtb.img）；如启动异常可依次尝试 `meson-gxbb-p201.dtb`、`meson-gxl-s905d-p231.dtb`、`meson-gxl-s805x-p241.dtb`。
@@ -24,6 +24,8 @@
 > 🔍 **启动失败排障（bootstage.txt）**：新版镜像的启动引导脚本会在 FAT 分区根目录写一个 `bootstage.txt` 进度标记，**再遇到黑屏/重启循环时，把卡插到电脑上打开这个文件**，看里面的字母就知道卡在哪一步：`A`=引导刚开始、`B`=内核 kernel.img 已加载、`C`=dtb.img 阶段、`D`=正在启动内核（**黑屏通常停在这**，多为 dtb 不匹配）、`E`=内核启动被退回（bootm 失败）。若 `D` 后黑屏，优先换 dtb（见上方提示）；若文件不存在，说明卡在更早阶段。
 >
 > ✅ **当前状态**：S905 修复版**已发布**（Release `20261009`，2026-10-09 构建成功，run 37909267307 全绿）。新版镜像：补开 18 项 GXL/S905L 内核驱动（DRM/MMC/USB/PM/HDMI/RTC/WDT 等）；**ramdisk 压缩从 zstd 改为 gzip**（GXL 时代原厂老 U-Boot 不支持 zstd 解压 ramdisk，bootm 直接失败导致黑屏重启循环；gzip 老 U-Boot 普遍支持）；**启动引导完全对齐 EmuELEC 4.3 已验证机制**（传统 aml_autoscript：`mmc 0` 无分区号 + `bootm` 无参数 + `store dtb read` 兜底，kernel_addr 改为 0x1080000 避免与 loadaddr 重叠）——**彻底修复 S905L 盒子黑屏重启循环**；并内置 bootstage.txt 启动日志用于再排障。旧版 `20261008`（zstd ramdisk + cfgload 新机制）及更早 `nightly-20260928`/`nightly-20260919` 已下线。镜像含 GXL/GXBB 全套 device tree 与主线 GXL 驱动模块，S905L 盒子按上方提示复制 DTB.IMG 即可尝试启动。
+>
+> ✅ **R36S 状态**：R36S 版 **20261019 已发布**（2026-10-19 构建成功，run 39191881938 全绿）。修复 RetroArch / ES 界面**中文显示为方块**问题：内置 Noto Sans CJK SC 简体中文字体（noto-cjk 包）+ RetroArch 菜单字体切换为 NotoSansCJKsc-Regular.otf（`menu_font_path`）；并排除 tic80-lr 核心（新工具链 `strncpy -Werror` 编译失败，与 S905 线同源）。旧版 `20261002` 已下线，请刷 `20261019` 后验证菜单中文显示。
 
 ---
 
