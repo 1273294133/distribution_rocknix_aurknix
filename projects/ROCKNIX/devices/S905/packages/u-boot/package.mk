@@ -3,10 +3,10 @@
 
 PKG_NAME="u-boot"
 PKG_VERSION="2025.04"
-PKG_SHA256="439d3bef296effd54130be6a731c5b118be7fddd7fcc663ccbc5fb18294d8718"
+PKG_SHA256="d60836f86e69adecbade967ca8a0944911c2916a2f85855f2e678fc5698c1014"
 PKG_LICENSE="GPL"
 PKG_SITE="https://www.denx.de/wiki/U-Boot"
-PKG_URL="https://ftp.denx.de/pub/u-boot/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+PKG_URL="https://github.com/1273294133/distribution_rocknix_aurknix/releases/download/sources-mirror/u-boot-2025.04.tar.gz"
 PKG_DEPENDS_TARGET="toolchain u-boot-tools:host"
 PKG_LONGDESC="Amlogic boot scripts for chain-booting from stock Android U-Boot."
 PKG_TOOLCHAIN="manual"
