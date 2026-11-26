@@ -8,7 +8,7 @@
 
 [![R36S 最新版本](https://img.shields.io/github/v/release/1273294133/distribution_rocknix_aurknix?filter=2026*&label=R36S%20%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=16a34a&style=for-the-badge)](https://github.com/1273294133/distribution_rocknix_aurknix/releases/tag/20261125)
 
-> ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者目前已只对 **R36S 寨机（RK3326）** 做实机适配与验证；S905 / S905L 电视盒子的适配已停止，不再发布镜像（旧版仍留在 Release 归档）。
+> ⚠️ **兼容性声明**：本项目仅为作者手头设备定制，**不保证所有设备可用，也不保证稳定性**。作者目前只对 **R36S 寨机（RK3326）** 做实机适配与验证，其他型号刷机前请自行评估风险。
 
 ### 📥 固件下载 / Firmware Downloads
 
